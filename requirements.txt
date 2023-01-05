@@ -1,0 +1,4 @@
+transformers
+discord.py
+sentence_transformers
+detoxify

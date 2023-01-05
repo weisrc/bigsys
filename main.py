@@ -64,4 +64,5 @@ async def on_message(message: discord.Message):
     await func(message, **answers)
     
 
-client.run(os.environ['DISCORD_TOKEN'])
+if __name__ == '__main__':
+    client.run(os.environ['DISCORD_TOKEN'])

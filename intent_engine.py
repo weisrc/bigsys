@@ -23,12 +23,11 @@ class IntentEngine:
 
     def predict(self, text):
         text_embed = st_model.encode(text, convert_to_tensor=True)
-        best_score = 0
+        best_score = float('-inf')
         best_intent: INTENT_TYPE = None
         for intent in self.intents:
             for intent_embed in intent[0]:
                 score = intent_embed.dot(text_embed)
-                print(score)
                 if score > best_score:
                     best_score = score
                     best_intent = intent

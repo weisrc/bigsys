@@ -11,11 +11,11 @@ qa_model = pipeline("question-answering", model="deepset/roberta-base-squad2",
 INTENT_TYPE = Tuple[torch.Tensor, Dict[str, str], Callable]
 
 
-class IntentStore:
+class IntentEngine:
     def __init__(self):
         self.intents: List[INTENT_TYPE] = []
 
-    def set(self, *texts, **questions):
+    def add(self, *texts, **questions):
         def wrapper(func):
             embeds = st_model.encode(texts, convert_to_tensor=True)
             self.intents.append((embeds, questions, func))

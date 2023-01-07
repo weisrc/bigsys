@@ -1,16 +1,20 @@
 from utils import Context
-from stores.commands import CommandStore
+from engines.commands import CommandEngine
 from tasks.basic import greet
-from tasks.music import play_music
+from tasks.music import play_music, next_music, pause_music, resume_music, list_music
 
-commands = CommandStore()
+engine = CommandEngine()
 
-commands.set('greet', name='\w+')(greet)
-commands.set('play', 'p', name='.+')(play_music)
+engine.add('greet', name='\w+')(greet)
+engine.add('play', 'p', search='.+')(play_music)
+engine.add('next', 'n', 'skip')(next_music)
+engine.add('pause', 'stop', 's')(pause_music)
+engine.add('resume', 'r', 'continue', 'c')(resume_music)
+engine.add('list', 'l', 'queue', 'q')(list_music)
 
 
 async def command_handler(ctx: Context, next):
-    command = commands.get(ctx.content)
+    command = engine.get(ctx.content)
     if not command:
         return next()
     print('command', command)

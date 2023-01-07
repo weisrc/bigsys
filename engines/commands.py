@@ -4,11 +4,11 @@ import re
 COMMAND_TYPE = Tuple[Pattern, Callable]
 SPACE_RE = re.compile(r'\s+')
 
-class CommandStore:
+class CommandEngine:
     def __init__(self):
         self.commands: Dict[str] = {}
 
-    def set(self, *commands, **arguments):
+    def add(self, *commands, **arguments):
         def wrapper(func):
             patterns: List[str] = []
             for k, v in arguments.items():
@@ -20,7 +20,11 @@ class CommandStore:
         return wrapper
 
     def get(self, text):
-        command, arg_text = SPACE_RE.split(text, 1)
+        match = SPACE_RE.split(text, 1)
+        if len(match) == 1:
+            command, arg_text = match[0], ''
+        else:
+            command, arg_text = match
 
         if command not in self.commands:
             return None

@@ -1,4 +1,6 @@
 transformers
-discord.py
+discord.py[voice]
 sentence_transformers
 detoxify
+youtube-search-python
+youtube-dl

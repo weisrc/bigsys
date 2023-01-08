@@ -31,8 +31,11 @@ class TrackEntry:
 
 class Track:
     loop = False
-    queue: List[TrackEntry] = []
     current: TrackEntry = None
+    queue: List[TrackEntry]
+
+    def __init__(self):
+        self.queue = []
 
     def add(self, *entries: List[TrackEntry]):
         self.queue.extend(entries)

@@ -3,7 +3,7 @@ from stores.track_store import TrackStore
 
 from client import client
 from utils import Context
-import asyncio
+from .vc_utils import attempt_vc_connect
 
 store = TrackStore()
 
@@ -16,19 +16,13 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
         if member.guild.voice_client is not None and member.guild.voice_client.channel == before.channel:
             if len(before.channel.members) == 1:
                 await member.guild.voice_client.disconnect()
-                await member.guild.voice_client.cleanup()
                 store.dispose(member.guild.id)
 
 
 async def play_music(ctx: Context, search: str):
-    if ctx.message.author.voice is None:
-        return await ctx.reply('You are not in a voice channel')
-    voice_channel = ctx.message.author.voice.channel
-    if ctx.message.guild.voice_client is None:
-        await voice_channel.connect()
-    voice_client = ctx.message.guild.voice_client
-    if voice_client.channel != voice_channel:
-        return await ctx.reply(f'Sorry, I am already in <#{voice_client.channel.id}> with people~')
+    voice_client = await attempt_vc_connect(ctx)
+    if voice_client is None:
+        return
 
     track = store.get(ctx.message.guild.id)
     entries = await track.add_from_search(search, ctx.message)
@@ -37,8 +31,6 @@ async def play_music(ctx: Context, search: str):
 
     if track.current:
         await ctx.reply('\n'.join([f'Queued {entry.webpage_url}' for entry in entries]))
-
-    
 
     async def play(*args):
         print(args)

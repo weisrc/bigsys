@@ -1,6 +1,10 @@
 transformers
-discord.py[voice]
+py-cord[voice]
+py-cord[speed]
 sentence_transformers
 detoxify
 youtube-search-python
 youtube-dl
+pvporcupine
+torchaudio
+git+https://github.com/openai/whisper.git

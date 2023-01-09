@@ -37,5 +37,5 @@ class WakeWordListener(Listener):
             if detection:
                 print(detection)
 
-    async def process(self, deque):
-        await execute(self, deque)
+    async def process(self):
+        await execute(self.sync_process)

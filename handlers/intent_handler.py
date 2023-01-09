@@ -1,5 +1,5 @@
 from params import ANSWER_THRESHOLD, INTENT_THRESHOLD
-from engines.intents import IntentEngine
+from engines.intent_engine import IntentEngine
 from tasks.basic import greet
 from tasks.music import play_music, next_music, pause_music, resume_music, list_music
 from utils import Context

@@ -8,8 +8,9 @@ from .listener import Listener
 from .wake_word_detector import WakeWordDetector
 
 
-class WakeWordListener(Listener):
-    def __init__(self, sampling_rate: int, channels: int, dtype: torch.dtype):
+class AssistantListener(Listener):
+    def __init__(self, sleep_time: int, sampling_rate: int, channels: int, dtype: torch.dtype):
+        super().__init__(sleep_time)
         self.sampling_rate = sampling_rate
         self.channels = channels
         self.dtype = dtype
@@ -29,13 +30,13 @@ class WakeWordListener(Listener):
         while len(self.deque):
             data, user_id = self.deque.popleft()
             if user_id in self.detectors:
-                detector = self.detectors[user_id]
-                detector.write(data)
+                self.detectors[user_id].write(data)
 
         for user_id, detector in self.detectors.items():
             detection = detector.detect()
-            if detection:
-                print(detection)
+            if detection is None:
+                continue
+            print("Detected", detection)
 
     async def process(self):
         await execute(self.sync_process)

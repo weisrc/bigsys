@@ -21,7 +21,7 @@ def int16_to_float32(x: torch.Tensor) -> torch.Tensor:
 
 
 def float32_to_int16(x: torch.Tensor) -> torch.Tensor:
-    return (x * 32768.0).type(torch.int16)
+    return (x * 32768.0).short()
 
 
 @cache

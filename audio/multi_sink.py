@@ -6,18 +6,24 @@ from discord.sinks.core import Filters
 from .listener import Listener
 
 
-class MultiSink(discord.sinks.core.Sink):
-    listeners: MutableSet[Listener]
 
-    def __init__(self, *, filters=None):
-        super.__init__(self, filters=filters)
-        self.listeners = []
+class MultiSink(discord.sinks.core.Sink):
+
+    def __init__(self):
+        super().__init__()
+        self.listeners: MutableSet[Listener] = set()
+
 
     def add(self, listener: Listener):
         self.listeners.add(listener)
 
     def remove(self, listener: Listener):
         self.listeners.remove(listener)
+
+    def cleanup(self):
+        self.finished = True
+        for al in self.listeners:
+            al.stop()
 
     @Filters.container
     def write(self, data, user_id):

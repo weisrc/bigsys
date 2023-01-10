@@ -1,8 +1,8 @@
 from utils import Context
 from engines.command_engine import CommandEngine
 from tasks.basic import greet
-from tasks.music import play_music, next_music, pause_music, resume_music, list_music
-from tasks.voice import start_voice
+from tasks.music import play_music, next_music, pause_music, resume_music, list_music, music_volume
+from tasks.assistant import start_assistant
 
 engine = CommandEngine()
 
@@ -12,7 +12,8 @@ engine.add('next', 'n', 'skip')(next_music)
 engine.add('pause', 'stop', 's')(pause_music)
 engine.add('resume', 'r', 'continue', 'c')(resume_music)
 engine.add('list', 'l', 'queue', 'q')(list_music)
-engine.add('voice', 'v')(start_voice)
+engine.add('assistant', 'a')(start_assistant)
+engine.add('volume', 'vol', 'v', volume='\d+')(music_volume)
 
 
 async def command_handler(ctx: Context, next):

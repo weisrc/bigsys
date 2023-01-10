@@ -1,6 +1,8 @@
 from functools import cache
 import torch
 from torchaudio.transforms import Resample
+from dataclasses import dataclass
+from discord import VoiceClient
 
 
 def get_dtype(size: int):
@@ -22,6 +24,30 @@ def int16_to_float32(x: torch.Tensor) -> torch.Tensor:
 
 def float32_to_int16(x: torch.Tensor) -> torch.Tensor:
     return (x * 32768.0).short()
+
+
+@dataclass
+class AudioSpec:
+    channels: int
+    sampling_rate: int
+    sample_size: int
+    dtype: torch.dtype
+
+
+def get_audio_spec(voice_client: VoiceClient):
+    return AudioSpec(
+        voice_client.decoder.CHANNELS,
+        voice_client.decoder.SAMPLING_RATE,
+        voice_client.decoder.SAMPLE_SIZE,
+        get_dtype(voice_client.decoder.SAMPLE_SIZE //
+                  voice_client.decoder.CHANNELS)
+    )
+
+
+def raw_to_tensor(raw: bytes, audio_spec: AudioSpec):
+    interleaved = torch.frombuffer(raw, dtype=audio_spec.dtype)
+    return interleaved_to_mono(
+        int16_to_float32(interleaved), audio_spec.channels)
 
 
 @cache

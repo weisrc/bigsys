@@ -5,35 +5,36 @@ import pvporcupine
 import torch
 
 from .utils import (float32_to_int16, get_resampler, int16_to_float32,
-                    interleaved_to_mono)
+                    interleaved_to_mono, AudioSpec)
 
 NULL_BYTES_512 = b'\x00' * 512
 
 class WakeWordDetector:
-    def __init__(self, sampling_rate: int, channels: int, dtype: torch.dtype):
-        self.resampler = get_resampler(sampling_rate, 16_000)
-        self.channels = channels
-        self.dtype = dtype
+    def __init__(self, audio_spec: AudioSpec):
+        self.audio_spec = audio_spec
+        self.resampler = get_resampler(audio_spec.sampling_rate, 16_000)
         self.backlog = torch.Tensor().short()
-        self.bytes_list: List[bytes] = []
+        self.tensor_list: List[torch.Tensor] = []
         self.porcupine = pvporcupine.create(
             os.environ['PICOVOICE_ACCESS_KEY'],
-            keywords=["hey google"],
+            keywords=["alexa"],
         )
         self.frame_length = self.porcupine.frame_length
         self.flushed = True
 
-    def write(self, data: bytes):
-        self.bytes_list.append(data)
+    def write(self, data: torch.Tensor):
+        self.tensor_list.append(data)
 
     def read(self):
-        out = b''.join(self.bytes_list)
-        self.bytes_list = []
-        return out
+        if not self.tensor_list:
+            return None
+        tensor = torch.cat(self.tensor_list)
+        self.tensor_list = []
+        return tensor
 
     def detect(self):
-        raw = self.read()
-        if len(raw) == 0:
+        tensor = self.read()
+        if tensor is None:
             if self.flushed:
                 return None
             self.flushed = True
@@ -42,11 +43,9 @@ class WakeWordDetector:
                 if out >= 0:
                     return out
             return None
+
         self.flushed = False
-        interleaved = torch.frombuffer(raw, dtype=self.dtype)
-        mono = interleaved_to_mono(
-            int16_to_float32(interleaved), self.channels)
-        pcm = float32_to_int16(self.resampler(mono))
+        pcm = float32_to_int16(self.resampler(tensor))
         *frames, self.backlog = torch.cat([self.backlog, pcm]).split(self.frame_length)
 
         for frame in frames:

@@ -2,7 +2,7 @@ from os import environ
 
 import torch
 
-INTENT_THRESHOLD = 0.4
+INTENT_THRESHOLD = 0.3
 
 ANSWER_THRESHOLD = 0.5
 

@@ -9,13 +9,15 @@ import webrtcvad
 import time
 import torch
 import asyncio
+import params
 
 import whisper
-transcribe = whisper.load_model('tiny.en')
+transcribe = whisper.load_model('base.en', device=params.DEVICE)
 
-vad = webrtcvad.Vad(2)
+vad = webrtcvad.Vad(3)
 
 VOICE_ACTIVITY_TIMEOUT = 2
+
 
 class AssistantListener(Listener):
     def __init__(self, sleep_time: int, audio_spec: AudioSpec):
@@ -32,6 +34,9 @@ class AssistantListener(Listener):
     def has(self, user_id):
         return user_id in self.detectors
 
+    def is_empty(self):
+        return not len(self.detectors)
+
     def add(self, user_id: int, on_detect: Callable, on_transcript: Callable):
         self.detectors[user_id] = WakeWordDetector(self.audio_spec)
         self.on_detects[user_id] = on_detect
@@ -44,6 +49,18 @@ class AssistantListener(Listener):
         if user_id is self.transcript_user_id:
             self.transcript_user_id = None
             self.transcript_tensors = []
+
+    def transcribe(self, loop: asyncio.AbstractEventLoop):
+        pcm = torch.cat(self.transcript_tensors)
+        result = None
+        try:
+            result = transcribe.transcribe(self.resampler(pcm), fp16=False, language='en')
+            loop.create_task(
+                self.on_transcript[self.transcript_user_id](result['text']))
+        except Exception as e:
+            print(e)
+        self.transcript_user_id = None
+        self.transcript_tensors = []
 
     def sync_process(self, loop: asyncio.AbstractEventLoop):
         current_time = time.time()
@@ -60,12 +77,8 @@ class AssistantListener(Listener):
                 buf = float32_to_int16(data).numpy().tobytes()
                 if vad.is_speech(buf, self.audio_spec.sampling_rate):
                     self.last_voice_activity = current_time
-                elif current_time - self.last_voice_activity > VOICE_ACTIVITY_TIMEOUT:
-                    pcm = torch.cat(self.transcript_tensors)
-                    result = transcribe.transcribe(self.resampler(pcm))
-                    loop.create_task(self.on_transcript[user_id](result['text']))
-                    self.transcript_user_id = None
-                    self.transcript_tensors = []
+                if current_time - self.last_voice_activity > VOICE_ACTIVITY_TIMEOUT:
+                    self.transcribe(loop)
                 continue
 
             if user_id in self.detectors:

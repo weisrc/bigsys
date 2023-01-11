@@ -5,6 +5,7 @@ from client import client
 from utils import Context
 from .vc_utils import attempt_vc_connect
 from audio.multi_source import get_multi_source
+import re
 
 track_store = TrackStore()
 source_store = {}
@@ -27,12 +28,12 @@ async def play_music(ctx: Context, search: str):
         return
 
     track = track_store.get(ctx.message.guild.id)
-    entries = await track.add_from_search(search, ctx.message)
+    entries = await track.add_from_search(search, ctx)
     if len(entries) == 0:
         return await ctx.reply('No results found')
 
     if track.current:
-        await ctx.reply('\n'.join([f'Queued {entry.webpage_url}' for entry in entries]))
+        await ctx.reply('\n'.join([f'Queued {entry.title} ({entry.webpage_url})' for entry in entries]))
 
     multi_source = get_multi_source(voice_client)
 
@@ -42,8 +43,8 @@ async def play_music(ctx: Context, search: str):
         entry = track.next()
         if entry is None:
             return
-        multi_source.add("music", discord.FFmpegPCMAudio(entry.url), 0.01, play)
-        await track.current.ctx.reply(f'Now playing {track.current.webpage_url}')
+        multi_source.add("music", discord.FFmpegPCMAudio(entry.url), 0.1, play)
+        await track.current.ctx.reply(f'Now playing {track.current.title} ({track.current.webpage_url})')
     await play()
 
 
@@ -88,8 +89,13 @@ async def list_music(ctx: Context):
         return await ctx.reply('No music is playing')
     await ctx.reply(f'Now playing: {track.current.title}')
 
+INT_RE = re.compile(r'\d+')
+
 async def music_volume(ctx: Context, volume: str):
     if not await is_valid(ctx):
         return
-    get_multi_source(ctx.message.guild.voice_client).set_volume("music", float(volume) / 100)
+    volume = float(INT_RE.match(volume).group())
+    if volume < 0 or volume > 100:
+        return await ctx.reply('Volume must be between 0 and 100')
+    get_multi_source(ctx.message.guild.voice_client).set_volume("music", volume / 100)
     await ctx.reply(f'Volume is now at {volume}%')

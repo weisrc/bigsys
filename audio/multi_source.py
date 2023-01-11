@@ -96,6 +96,8 @@ class MultiSource(AudioSource):
     def read(self) -> bytes:
         out = torch.zeros(FRAME_SIZE // 2)
         for name, entry in list(self.entries.items()):
+            if entry.paused:
+                continue
             data = entry.source.read()
             if len(data) != FRAME_SIZE:
                 self.remove(name)

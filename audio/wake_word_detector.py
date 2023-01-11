@@ -17,7 +17,7 @@ class WakeWordDetector:
         self.tensor_list: List[torch.Tensor] = []
         self.porcupine = pvporcupine.create(
             os.environ['PICOVOICE_ACCESS_KEY'],
-            keywords=["alexa"],
+            keyword_paths=["models/ppn/bigsys-linux.ppn"]
         )
         self.frame_length = self.porcupine.frame_length
         self.flushed = True

@@ -1,4 +1,4 @@
-from functools import cache
+from functools import lru_cache
 import torch
 from torchaudio.transforms import Resample
 from dataclasses import dataclass
@@ -50,6 +50,6 @@ def raw_to_tensor(raw: bytes, audio_spec: AudioSpec):
         int16_to_float32(interleaved), audio_spec.channels)
 
 
-@cache
+@lru_cache(maxsize=None)
 def get_resampler(source_hz: int, target_hz: int) -> Resample:
     return Resample(source_hz, target_hz)

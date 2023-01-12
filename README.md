@@ -71,6 +71,7 @@ After a wake word detection, it will start transcribing the user's utterances us
 To run this bot, the environment variables `DISCORD_BOT_TOKEN` and `PICOVOICE_ACCESS_SECRET` must be set. If you are running without the voice related commands bootstrapped, you do not need to set `PICOVOICE_ACCESS_SECRET`. Please note that you need an account to obtain the `PICOVOICE_ACCESS_SECRET`.
 
 Running the following command in the repository is sufficient to boot the bot up.
+
 ```sh
 python main.py
 ```

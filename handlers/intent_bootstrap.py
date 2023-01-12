@@ -1,6 +1,7 @@
 from tasks.basic import greet, exit_vc, wiki
 from tasks.music import play_music, next_music, pause_music, resume_music, list_music, music_volume
 from tasks.assistant import start_assistant, stop_assistant
+from tasks.info import info_creator, info_name, info_functions
 from .intent_handler import engine
 
 
@@ -26,3 +27,7 @@ def intent_bootstrap():
                'start voice assistant mode')(start_assistant)
     engine.add('stop assistant', 'stop voice assistant',
                'stop voice assistant mode')(stop_assistant)
+
+    engine.add('info creator', 'who created you', 'who made you')(info_creator)
+    engine.add('info name', 'what is your name?', 'why are you called bigsys')(info_name)
+    engine.add('info functions', 'what can you do', 'what are your functions')(info_functions)

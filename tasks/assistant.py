@@ -43,7 +43,7 @@ async def start_assistant(ctx: Context):
 
         def on_should_stop():
             nonlocal voice_client
-            if voice_client or voice_client.recording:
+            if voice_client and voice_client.recording:
                 voice_client.stop_recording()
         multi_sink.on_should_stop = on_should_stop
         voice_client.start_recording(multi_sink, callback)

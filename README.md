@@ -12,6 +12,7 @@ PRs are welcomed! 🙏
 - Monthly report on the most X users based on statistics
 - Documentation website for users and developers
 - Music lyrics, looping and better listing
+- Google Colab for quick bot testing
 
 ## Disclaimer
 

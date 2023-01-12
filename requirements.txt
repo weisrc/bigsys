@@ -11,3 +11,4 @@ git+https://github.com/openai/whisper.git
 wikipedia
 webrtcvad
 gTTS
+miniaudio

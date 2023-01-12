@@ -1,22 +1,19 @@
 import os
 
+from bootstraps.command_bootstrap import command_bootstrap
+from bootstraps.intent_bootstrap import intent_bootstrap
 from client import client, message_filter, message_handler
 from filters.basic_filters import bot_filter, call_filter, guild_filter
 from filters.toxicity_filter import toxicity_filter
-from handlers.command_handler import command_handler
 from handlers.converse_handler import converse_handler
-from handlers.intent_handler import intent_handler
-from handlers.intent_bootstrap import intent_bootstrap
-
-intent_bootstrap()
 
 message_filter(guild_filter)
 message_filter(bot_filter)
 message_filter(toxicity_filter)
 message_filter(call_filter)
 
-message_handler(command_handler)
-message_handler(intent_handler)
+message_handler(command_bootstrap())
+message_handler(intent_bootstrap())
 message_handler(converse_handler)
 
 

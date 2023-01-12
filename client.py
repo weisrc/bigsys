@@ -4,7 +4,7 @@ import discord
 
 from utils import Context
 
-client = discord.Client(intents=discord.Intents.all())
+client = discord.Bot(intents=discord.Intents.all())
 
 
 @client.event
@@ -24,6 +24,8 @@ def message_handler(func: Callable):
 def message_filter(func: Callable):
     message_filters.append(func)
     return func
+
+
 
 
 @client.event

@@ -2,12 +2,12 @@ from tasks.basic import greet, exit_vc, wiki
 from tasks.music import play_music, next_music, pause_music, resume_music, list_music, music_volume
 from tasks.assistant import start_assistant, stop_assistant
 from tasks.info import info_creator, info_name, info_functions
-from .intent_handler import engine
+from handlers.intent_handler import engine, intent_handler
 
 
 def intent_bootstrap():
     engine.add('say hello to someone', 'greet someone', name='to whom?')(greet)
-    engine.add('leave voice channel', 'exit voice channel')(exit_vc)
+    engine.add('leave voice channel', 'exit voice channel', 'leave call')(exit_vc)
     engine.add('wiki', 'wikipedia', 'search wikipedia', 'what is something?', 'what are something?',
                'who is someone?', search='what to search?')(wiki)
 
@@ -31,3 +31,5 @@ def intent_bootstrap():
     engine.add('info creator', 'who created you', 'who made you')(info_creator)
     engine.add('info name', 'what is your name?', 'why are you called bigsys')(info_name)
     engine.add('info functions', 'what can you do', 'what are your functions')(info_functions)
+
+    return intent_handler

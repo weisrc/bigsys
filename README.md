@@ -4,7 +4,7 @@ A Discord bot that can play music from YouTube, search on Wikipedia and other ba
 
 ## TODO
 
-Please contribute! 🙏
+PRs are welcomed! 🙏
 
 - Administration and moderation commands
 - Slash commands integration

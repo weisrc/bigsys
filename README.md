@@ -28,7 +28,7 @@ This bot is quite computationally heavy as it uses 6 machine learning models whe
 
 Textual machine learning models:
 - https://github.com/unitaryai/detoxify for toxicity detection
-- https://huggingface.co/sentence-transformers to find the nearest intent
+- https://huggingface.co/sentence-transformers for prompt embeddings
 - https://huggingface.co/tasks/question-answering to query the arguments of the nearest intent
 - https://huggingface.co/tasks/conversational for conversations
 

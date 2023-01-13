@@ -6,13 +6,13 @@ A Discord bot that can play music from YouTube, search on Wikipedia and other ba
 
 PRs are welcomed! 🙏
 
-- Administration and moderation commands
-- Slash commands integration
-- BigSys Affection, a tradeable currency gained by good will
-- Monthly report on the most X users based on statistics
-- Documentation website for users and developers
-- Music lyrics, looping and better listing
-- Google Colab for quick bot testing
+- [ ] Administration and moderation commands
+- [ ] Slash commands integration
+- [ ] BigSys Affection, a tradeable currency gained by good will
+- [ ] Reports on the nicest, most toxic and etc users based on statistics.
+- [ ] Documentation website for users and developers
+- [ ] Music lyrics, looping and better listing
+- [ ] Google Colab for quick bot testing
 
 ## Disclaimer
 

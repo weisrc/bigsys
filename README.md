@@ -22,7 +22,7 @@ Depsite the permissive licensing, it is strongly suggested to not use this bot c
 
 BigSys stands for Big System. It is also a play of word as it sounds like Big Sis. This name is also a reference to Big Brother in 1984 by George Orwell.
 
-This bot is quite computationally heavy as it uses 6 machine learning models when all functionalities are bootstraped.
+This bot is quite computationally heavy as it uses 7 machine learning models when all functionalities are bootstraped.
 
 ## Models
 

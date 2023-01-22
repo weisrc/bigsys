@@ -26,7 +26,7 @@ class AssistantContext(Context):
         if self.message.guild.voice_client:
             self.multi_source.add(f'assistant_{self.message.author.id}',
                                   get_tts_audio_source(tts_text))
-        await super().reply(f'>{self.content}\n{text}')
+        await super().reply(f'> {self.content}\n{text}')
 
 
 async def start_assistant(ctx: Context):
@@ -67,9 +67,13 @@ async def start_assistant(ctx: Context):
             multi_source.add(f'assistant_{ctx.message.author.id}',
                              get_tts_audio_source(f"What's up {ctx.message.author.name}!"))
 
-        async def on_transcript(text):
+        async def on_transcript(text: str):
             do_next = False
-            actx = AssistantContext(text, ctx, multi_source)
+            actx = AssistantContext(text.strip(), ctx, multi_source)
+
+            if len(actx.content.strip()) == 0:
+                actx.content = '[silence]'
+                return await actx.reply("Sorry, I didn't hear anything")
 
             def next():
                 nonlocal do_next
@@ -77,7 +81,6 @@ async def start_assistant(ctx: Context):
             await intent_handler(actx, next)
             if do_next:
                 await converse_handler(actx, next)
-                # await actx.reply("Sorry, I didn't understand that")
 
         assistant.add(ctx.message.author.id, on_detect, on_transcript)
         await ctx.reply(f'Voice assistant mode activated! Say BigSys!')

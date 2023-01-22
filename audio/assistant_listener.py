@@ -12,7 +12,7 @@ import asyncio
 import params
 
 import whisper
-transcribe = whisper.load_model('base.en', device=params.DEVICE)
+transcribe = whisper.load_model('tiny.en', device=params.DEVICE)
 
 vad = webrtcvad.Vad(3)
 

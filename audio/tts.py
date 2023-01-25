@@ -3,9 +3,10 @@ import gtts
 import miniaudio
 import io
 
-def get_tts_audio_source(text: str) -> PCMAudio:
+
+def get_tts_audio_source(text: str, lang='en') -> PCMAudio:
     buffer = io.BytesIO()
-    gtts.gTTS(text).write_to_fp(buffer)
+    gtts.gTTS(text, lang=lang).write_to_fp(buffer)
     buffer.seek(0)
     decoded = miniaudio.decode(buffer.read(), sample_rate=48000)
     decoded_buffer = io.BytesIO()

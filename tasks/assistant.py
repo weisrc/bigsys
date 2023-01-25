@@ -25,7 +25,7 @@ class AssistantContext(Context):
         tts_text = EXTRA_RE.sub('', text)
         if self.message.guild.voice_client:
             self.multi_source.add(f'assistant_{self.message.author.id}',
-                                  get_tts_audio_source(tts_text))
+                                  get_tts_audio_source(tts_text, lang=self.lang))
         await super().reply(f'> {self.content}\n{text}')
 
 

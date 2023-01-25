@@ -33,6 +33,8 @@ def execute(f, *args, **kwargs):
 
 class Context:
 
+    lang = 'en'
+
     def __init__(self, client: discord.Client, message: discord.Message):
         clean = message.content.replace(
             f'<@{client.user.id}>', '').strip()

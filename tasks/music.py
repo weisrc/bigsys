@@ -98,4 +98,4 @@ async def music_volume(ctx: Context, volume: str):
     if volume < 0 or volume > 100:
         return await ctx.reply('Volume must be between 0 and 100')
     get_multi_source(ctx.message.guild.voice_client).set_volume("music", volume / 100)
-    await ctx.reply(f'Volume is now at {volume}%')
+    await ctx.reply(f'Volume is now at {round(volume)}%')

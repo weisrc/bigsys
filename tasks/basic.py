@@ -17,3 +17,6 @@ async def exit_vc(ctx: Context):
 
 async def wiki(ctx: Context, search: str):
     await ctx.reply(f'According to Wikipedia, {wikipedia.summary(search, sentences=1)}')
+
+async def ligma(ctx: Context):
+    await ctx.reply('Ligma balls')

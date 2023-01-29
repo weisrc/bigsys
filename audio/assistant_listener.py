@@ -54,7 +54,8 @@ class AssistantListener(Listener):
         pcm = torch.cat(self.transcript_tensors)
         result = None
         try:
-            result = transcribe.transcribe(self.resampler(pcm), fp16=False, language='en')
+            result = transcribe.transcribe(
+                self.resampler(pcm), fp16=False, language='en')
             loop.create_task(
                 self.on_transcript[self.transcript_user_id](result['text']))
         except Exception as e:
@@ -62,23 +63,29 @@ class AssistantListener(Listener):
         self.transcript_user_id = None
         self.transcript_tensors = []
 
+    def start_transcribe(self, user_id: int):
+        self.transcript_tensors = []
+        self.transcript_user_id = user_id
+        self.last_voice_activity = time.time()
+
     def sync_process(self, loop: asyncio.AbstractEventLoop):
         current_time = time.time()
+
+        if self.transcript_user_id:
+            if current_time - self.last_voice_activity > VOICE_ACTIVITY_TIMEOUT:
+                self.transcribe(loop)
+
         while len(self.deque):
             raw, user_id = self.deque.popleft()
             data = raw_to_tensor(raw, self.audio_spec)
 
-            if self.transcript_user_id:
-                if self.transcript_user_id != user_id:
-                    continue
+            if self.transcript_user_id == user_id:
                 self.transcript_tensors.append(data)
                 if data.shape[0] != 960:
                     continue
                 buf = float32_to_int16(data).numpy().tobytes()
                 if vad.is_speech(buf, self.audio_spec.sampling_rate):
                     self.last_voice_activity = current_time
-                if current_time - self.last_voice_activity > VOICE_ACTIVITY_TIMEOUT:
-                    self.transcribe(loop)
                 continue
 
             if user_id in self.detectors:
@@ -95,6 +102,4 @@ class AssistantListener(Listener):
         if user_id is None:
             return
         await self.on_detects[user_id]()
-        self.transcript_tensors = []
-        self.transcript_user_id = user_id
-        self.last_voice_activity = time.time()
+        

@@ -64,8 +64,10 @@ async def start_assistant(ctx: Context):
 
     if not assistant.has(ctx.message.author.id):
         async def on_detect():
+            async def on_end():
+                assistant.start_transcribe(ctx.message.author.id)
             multi_source.add(f'assistant_{ctx.message.author.id}',
-                             get_tts_audio_source(f"What's up {ctx.message.author.name}!"))
+                             get_tts_audio_source(f"What's up {ctx.message.author.name}!"), 1, on_end)
 
         async def on_transcript(text: str):
             do_next = False

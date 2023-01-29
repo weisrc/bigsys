@@ -20,4 +20,8 @@ async def intent_handler(ctx: Context, next):
     # for k, a_score in answer_scores.items():
     #     if a_score < ANSWER_THRESHOLD:
     #         await ctx.reply(f"[score={a_score}] Can you please specify the following in your prompt: {questions[k]}")
-    await func(ctx, **answers)
+    try:
+        await func(ctx, **answers)
+    except Exception as e:
+        print(e)
+        await ctx.reply(f"Sorry something went wrong: {e}")

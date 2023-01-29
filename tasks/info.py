@@ -1,7 +1,7 @@
 from utils import Context
 
 async def info_name(ctx: Context):
-    await ctx.reply("My name is BigSys. It stands for big system, but is also a word pun for big sister. It is also a reference to 1984 Big Brother.")
+    await ctx.reply("My name is BigSys. It stands for big system, but is also a word pun for big sister as well as a reference to 1984 Big Brother.")
 
 async def info_creator(ctx: Context):
     await ctx.reply("I was created as an experiment by Wei (weisrc) on GitHub. I am Open Source under the MIT License. Please star or contribute! (https://github.com/weisrc/bigsys)")

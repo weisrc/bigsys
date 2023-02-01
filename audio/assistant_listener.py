@@ -51,15 +51,17 @@ class AssistantListener(Listener):
             self.transcript_tensors = []
 
     def transcribe(self, loop: asyncio.AbstractEventLoop):
-        pcm = torch.cat(self.transcript_tensors)
-        result = None
-        try:
-            result = transcribe.transcribe(
-                self.resampler(pcm), fp16=False, language='en')
-            loop.create_task(
-                self.on_transcript[self.transcript_user_id](result['text']))
-        except Exception as e:
-            print(e)
+        result = ""
+        if len(self.transcript_tensors):
+            pcm = torch.cat(self.transcript_tensors)
+            result = None
+            try:
+                result = transcribe.transcribe(
+                    self.resampler(pcm), fp16=False, language='en')['text']
+            except Exception as e:
+                print(e)
+        loop.create_task(
+            self.on_transcript[self.transcript_user_id](result))
         self.transcript_user_id = None
         self.transcript_tensors = []
 
@@ -102,4 +104,3 @@ class AssistantListener(Listener):
         if user_id is None:
             return
         await self.on_detects[user_id]()
-        

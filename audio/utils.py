@@ -3,6 +3,7 @@ import torch
 from torchaudio.transforms import Resample
 from dataclasses import dataclass
 from discord import VoiceClient
+from typing import Callable
 
 
 def get_dtype(size: int):
@@ -17,6 +18,8 @@ def interleaved_to_mono(interleaved: torch.Tensor, channels: int):
     pairs = interleaved.reshape(-1, channels)
     return pairs.mean(dim=1)
 
+def mono_to_stereo(mono: torch.Tensor):
+    return torch.stack((mono, mono), dim=1)
 
 def int16_to_float32(x: torch.Tensor) -> torch.Tensor:
     return x / 32768.0
@@ -51,5 +54,5 @@ def raw_to_tensor(raw: bytes, audio_spec: AudioSpec):
 
 
 @lru_cache(maxsize=None)
-def get_resampler(source_hz: int, target_hz: int) -> Resample:
+def get_resampler(source_hz: int, target_hz: int) -> Callable[[torch.Tensor], torch.Tensor]:
     return Resample(source_hz, target_hz)

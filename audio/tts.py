@@ -29,13 +29,16 @@ import io
 
 from espnet2.bin.tts_inference import Text2Speech
 from .utils import get_resampler, float32_to_int16, mono_to_stereo
-resampler = get_resampler(22050, 48000)
+from torchaudio.transforms import PitchShift
 model = Text2Speech.from_pretrained("espnet/kan-bayashi_ljspeech_vits")
-
+resampler = get_resampler(22050, 48000)
+shifter = PitchShift(22050, 3)
 
 def get_tts_audio_source(text: str, lang='en') -> PCMAudio:
     mono = model(text)['wav']
-    pcm = float32_to_int16(resampler(mono))
+    mono = shifter(mono)
+    mono = resampler(mono)
+    pcm = float32_to_int16(mono)
     buf = io.BytesIO()
     buf.write(mono_to_stereo(pcm).numpy().tobytes())
     buf.seek(0)

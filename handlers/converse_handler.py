@@ -1,8 +1,13 @@
 from transformers import Conversation, pipeline
 from utils import Context, execute
+from utils import logger
 
+l = logger.getChild(__name__)
+
+l.info('loading conversational model')
 converse = pipeline("conversational", model="facebook/blenderbot-400M-distill",
                     tokenizer="facebook/blenderbot-400M-distill")
+l.info('done loading conversational model')
 
 conversation = Conversation()
 

@@ -2,14 +2,17 @@ from typing import Callable
 
 import discord
 
-from utils import Context
+from utils import Context, logger, log_resource_usage
 
 client = discord.Bot(intents=discord.Intents.all())
+
+l = logger.getChild(__name__)
 
 
 @client.event
 async def on_ready():
-    print(f'Logged on as {client.user}!')
+    l.info(f'logged on as {client.user}')
+    log_resource_usage()
 
 
 message_handlers = []
@@ -26,11 +29,8 @@ def message_filter(func: Callable):
     return func
 
 
-
-
 @client.event
 async def on_message(message: discord.Message):
-
 
     ctx = Context(client, message)
 

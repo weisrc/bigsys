@@ -6,7 +6,6 @@ from utils import Context
 engine = IntentEngine()
 
 
-
 async def intent_handler(ctx: Context, next):
     intent_out = await engine.get_async(ctx.content)
     if not intent_out:

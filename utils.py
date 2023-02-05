@@ -1,7 +1,15 @@
-import re
-import discord
-from typing import Tuple, Dict
+import logging
 import asyncio
+import re
+import warnings
+from typing import Dict, Tuple
+
+import psutil
+import discord
+import coloredlogs
+import torch
+
+warnings.filterwarnings("ignore", category=UserWarning)
 
 MENTION_RE = re.compile(r'<@!?(\d{18})>')
 MENTIONS_TYPE = Dict[str, int]
@@ -44,3 +52,17 @@ class Context:
 
     async def reply(self, text: str):
         await self.message.reply(denormalize(text, self.mentions))
+
+
+logger = logging.getLogger("bigsys")
+logger.propagate = False
+fmt = '%(asctime)s %(name)s %(levelname)s %(message)s'
+coloredlogs.install(fmt=fmt, logger=logger)
+
+
+def log_resource_usage():
+    process = psutil.Process()
+    cpu = process.cpu_percent()
+    ram = process.memory_info().rss / 1024 / 1024
+    vram = torch.cuda.memory_allocated() / 1024 / 1024
+    logger.info(f"usage: {cpu=}%, {ram=}MiB, {vram=}MiB")

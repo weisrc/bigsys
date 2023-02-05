@@ -1,10 +1,17 @@
-from discord.player import PCMAudio
 import io
 
+from discord.player import PCMAudio
 from espnet2.bin.tts_inference import Text2Speech
-from .utils import get_resampler, float32_to_int16, mono_to_stereo
 from torchaudio.transforms import PitchShift
+
+from utils import logger
+
+from .utils import float32_to_int16, get_resampler, mono_to_stereo
+
+l = logger.getChild(__name__)
+l.info('loading text to speech model')
 model = Text2Speech.from_pretrained("espnet/kan-bayashi_ljspeech_vits")
+l.info('done loading text to speech model')
 resampler = get_resampler(22050, 48000)
 shifter = PitchShift(22050, 2)
 

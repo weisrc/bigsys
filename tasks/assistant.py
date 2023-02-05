@@ -14,9 +14,6 @@ assistants: Dict[int, AssistantListener] = {}
 
 EXTRA_RE = re.compile(r'\([^)]*\)')
 
-GREETINGS = ["You are truly the lowest of the scums, however I will still listen to you since you are a human, and according to the United Nations, I cannot discriminate people. So what do you want", "Oh my god! what is it ", "You are getting very annoying, you know?", "Shut the fuck up" ,"What's up", "What's good", "How is it going", "Hello", "Hey", "Greetings", "Yo", "Howdy", "Sup"]
-greetings_i = 0
-
 class AssistantContext(Context):
     def __init__(self, content: str, ctx: Context, multi_source: MultiSource):
         super().__init__(ctx.client, ctx.message)
@@ -68,10 +65,8 @@ async def start_assistant(ctx: Context):
         async def on_detect():
             async def on_end():
                 assistant.start_transcribe(ctx.message.author.id)
-            global greetings_i
             multi_source.add(f'assistant_{ctx.message.author.id}',
-                             get_tts_audio_source(f"{GREETINGS[greetings_i % len(GREETINGS)]} {ctx.message.author.name}"), 1, on_end)
-            greetings_i += 1
+                             get_tts_audio_source(f"What's up {ctx.message.author.name}"), 1, on_end)
 
         async def on_transcript(text: str):
             do_next = False

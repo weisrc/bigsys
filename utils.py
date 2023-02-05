@@ -56,8 +56,11 @@ class Context:
 
 logger = logging.getLogger("bigsys")
 logger.propagate = False
-fmt = '%(asctime)s %(name)s %(levelname)s %(message)s'
+fmt = '%(asctime)s %(name)s %(levelname)s %(message).80s'
 coloredlogs.install(fmt=fmt, logger=logger)
+discord_logger = logging.getLogger("discord")
+discord_logger.propagate = False
+coloredlogs.install(fmt=fmt, logger=discord_logger)
 
 
 def log_resource_usage():
@@ -65,4 +68,4 @@ def log_resource_usage():
     cpu = process.cpu_percent()
     ram = process.memory_info().rss / 1024 / 1024
     vram = torch.cuda.memory_allocated() / 1024 / 1024
-    logger.info(f"usage: {cpu=}%, {ram=}MiB, {vram=}MiB")
+    logger.info(f"Usage: {cpu=}%, {ram=}MiB, {vram=}MiB.")

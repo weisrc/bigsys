@@ -16,9 +16,9 @@ import whisper
 from utils import logger
 
 l = logger.getChild(__name__)
-l.info('loading speech recognition model')
+l.info('Loading speech recognition model.')
 transcribe = whisper.load_model('tiny.en', device=params.DEVICE)
-l.info("done loading speech recognition model")
+l.info("Done loading speech recognition model.")
 
 vad = webrtcvad.Vad(3)
 VOICE_ACTIVITY_TIMEOUT = 2

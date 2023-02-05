@@ -4,10 +4,10 @@ from utils import logger
 
 l = logger.getChild(__name__)
 
-l.info('loading conversational model')
+l.info('Loading conversational model.')
 converse = pipeline("conversational", model="facebook/blenderbot-400M-distill",
                     tokenizer="facebook/blenderbot-400M-distill")
-l.info('done loading conversational model')
+l.info('Done loading conversational model.')
 
 conversation = Conversation()
 

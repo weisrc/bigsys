@@ -9,9 +9,9 @@ from utils import logger
 from .utils import float32_to_int16, get_resampler, mono_to_stereo
 
 l = logger.getChild(__name__)
-l.info('loading text to speech model')
+l.info('Loading text to speech model.')
 model = Text2Speech.from_pretrained("espnet/kan-bayashi_ljspeech_vits")
-l.info('done loading text to speech model')
+l.info('Done loading text to speech model.')
 resampler = get_resampler(22050, 48000)
 shifter = PitchShift(22050, 2)
 

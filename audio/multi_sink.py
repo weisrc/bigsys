@@ -5,7 +5,8 @@ from discord.sinks.core import Filters
 
 from .listener import Listener
 
-
+from utils import get_logger
+l = get_logger(__name__)
 
 class MultiSink(discord.sinks.core.Sink):
 
@@ -25,7 +26,7 @@ class MultiSink(discord.sinks.core.Sink):
             self.on_should_stop()
 
     def cleanup(self):
-        print("disposing multisink")
+        l.debug("Cleaning up multisink")
         for al in list(self.listeners):
             self.remove(al)
 

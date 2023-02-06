@@ -1,10 +1,10 @@
 from params import ANSWER_THRESHOLD, INTENT_THRESHOLD
 from engines.intent_engine import IntentEngine
 
-from utils import Context
+from utils import Context, get_logger
 
 engine = IntentEngine()
-
+l = get_logger(__name__)
 
 async def intent_handler(ctx: Context, next):
     intent_out = await engine.get_async(ctx.content)
@@ -12,7 +12,7 @@ async def intent_handler(ctx: Context, next):
         return next()
     func, answers, score, answer_scores, questions = intent_out
 
-    print('intent', score, func, answers)
+    l.debug(f'Found {func=}, {score=}, {answers=}')
     if score < INTENT_THRESHOLD:
         return next()
 
@@ -22,5 +22,5 @@ async def intent_handler(ctx: Context, next):
     try:
         await func(ctx, **answers)
     except Exception as e:
-        print(e)
+        l.debug(e)
         await ctx.reply(f"Sorry something went wrong: {e}")

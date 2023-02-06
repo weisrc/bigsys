@@ -3,15 +3,15 @@ from transformers import pipeline
 from sentence_transformers import SentenceTransformer
 import torch
 import asyncio
-from utils import logger
+from utils import get_logger
 
-l = logger.getChild(__name__)
-l.info('Loading sentence transformer model.')
+l = get_logger(__name__)
+l.info('loading sentence transformer model')
 st_model = SentenceTransformer('all-MiniLM-L6-v2')
-l.info('Loading question answering model.')
+l.info('loading question answering model')
 qa_model = pipeline("question-answering", model="deepset/roberta-base-squad2",
                     tokenizer="deepset/roberta-base-squad2")
-l.info('Done loading models.')
+l.info('loaded models')
 
 INTENT_TYPE = Tuple[torch.Tensor, Dict[str, str], Callable]
 

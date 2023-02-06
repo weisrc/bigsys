@@ -6,9 +6,11 @@ from discord.voice_client import VoiceClient
 import torch
 from typing import Callable
 from .utils import get_audio_spec
+from utils import get_logger
 
 FRAME_SIZE = Encoder.FRAME_SIZE
 
+l = get_logger(__name__)
 
 multi_sources = {}
 
@@ -22,13 +24,10 @@ def get_multi_source(voice_client: VoiceClient):
         multi_sources[id] = multi_source
 
         def callback(*args):
-            print("multi_source after", args)
             del multi_sources[id]
         if voice_client.is_playing():
-            print("voice client already has a source, disposing old...")
             voice_client.stop()
         voice_client.play(multi_source, after=callback)
-        print("playing multi_source")
     return multi_source
 
 
@@ -54,13 +53,13 @@ class MultiSource(AudioSource):
             raise Exception("MultiSource does not support opus sources")
         if self.has(name):
             self.remove(name)
-        print("adding", name)
+        l.debug(f"Adding source {name}")
         self.entries[name] = SourceEntry(source, volume, on_end)
         self.update_play_state()
 
     def remove(self, name: str):
         if name in self.entries:
-            print("removing", name)
+            l.debug(f"Removing source {name}")
             entry = self.entries[name]
             self.voice_client.loop.create_task(entry.on_end())
             entry.source.cleanup()
@@ -78,10 +77,10 @@ class MultiSource(AudioSource):
 
     def update_play_state(self):
         if self.should_play():
-            print("resuming")
+            l.debug("Resuming voice client")
             self.voice_client.resume()
         else:
-            print("pausing")
+            l.debug("Pausing voice client")
             self.voice_client.pause()
 
     def set_paused(self, name: str, paused: bool):

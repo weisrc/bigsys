@@ -13,12 +13,12 @@ import params
 
 import whisper
 
-from utils import logger
+from utils import get_logger
 
-l = logger.getChild(__name__)
-l.info('Loading speech recognition model.')
+l = get_logger(__name__)
+l.info('loading speech recognition model')
 transcribe = whisper.load_model('tiny.en', device=params.DEVICE)
-l.info("Done loading speech recognition model.")
+l.info("loaded speech recognition model")
 
 vad = webrtcvad.Vad(3)
 VOICE_ACTIVITY_TIMEOUT = 2
@@ -64,7 +64,7 @@ class AssistantListener(Listener):
                 result = transcribe.transcribe(
                     self.resampler(pcm), fp16=False, language='en')['text']
             except Exception as e:
-                print(e)
+                l.exception(e)
         loop.create_task(
             self.on_transcript[self.transcript_user_id](result))
         self.transcript_user_id = None

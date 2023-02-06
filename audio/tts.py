@@ -4,14 +4,14 @@ from discord.player import PCMAudio
 from espnet2.bin.tts_inference import Text2Speech
 from torchaudio.transforms import PitchShift
 
-from utils import logger
+from utils import get_logger
 
 from .utils import float32_to_int16, get_resampler, mono_to_stereo
 
-l = logger.getChild(__name__)
-l.info('Loading text to speech model.')
+l = get_logger(__name__)
+l.info('loading text to speech model')
 model = Text2Speech.from_pretrained("espnet/kan-bayashi_ljspeech_vits")
-l.info('Done loading text to speech model.')
+l.info('loaded text to speech model')
 resampler = get_resampler(22050, 48000)
 shifter = PitchShift(22050, 2)
 
@@ -43,7 +43,6 @@ def get_tts_audio_source(text: str, lang='en') -> PCMAudio:
 # import numpy as np
 
 # def get_tts_audio_source(text: str, lang='en') -> PCMAudio:
-#     print(text)
 #     decoded_buffer = io.BytesIO()
 #     mono: np.ndarray
 #     mono, _sr = pyopenjtalk.tts(text)

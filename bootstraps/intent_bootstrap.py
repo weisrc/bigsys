@@ -3,12 +3,12 @@ from tasks.music import play_music, next_music, pause_music, resume_music, list_
 from tasks.assistant import start_assistant, stop_assistant
 from tasks.info import info_creator, info_name, info_functions
 from handlers.intent_handler import engine, intent_handler
-from utils import logger
+from utils import get_logger
 
-l = logger.getChild(__name__)
+l = get_logger(__name__)
 
 def intent_bootstrap():
-    l.info('Bootstrapping intents.')
+    l.info('bootstrapping intents')
     
     engine.add('say hello to someone', 'greet someone', name='to whom?')(greet)
     engine.add('leave voice channel', 'exit voice channel', 'leave call')(exit_vc)
@@ -37,6 +37,6 @@ def intent_bootstrap():
     engine.add('info functions', 'what can you do', 'what are your functions')(info_functions)
     engine.add('ligma', 'what is ligma')(ligma)
 
-    l.info('Done bootstrapping intents.')
+    l.info('bootstrapped intents')
 
     return intent_handler

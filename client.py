@@ -2,16 +2,16 @@ from typing import Callable
 
 import discord
 
-from utils import Context, logger, log_resource_usage
+from utils import Context, get_logger, log_resource_usage
 
 client = discord.Bot(intents=discord.Intents.all())
 
-l = logger.getChild(__name__)
+l = get_logger(__name__)
 
 
 @client.event
 async def on_ready():
-    l.info(f'Logged on as {client.user}.')
+    l.info(f'logged on as {client.user}')
     log_resource_usage()
 
 

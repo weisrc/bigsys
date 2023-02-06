@@ -63,9 +63,17 @@ discord_logger.propagate = False
 coloredlogs.install(fmt=fmt, logger=discord_logger)
 
 
-def log_resource_usage():
+def get_logger(name: str):
+    return logger.getChild(name)
+
+
+def get_resource_usage() -> Tuple[float, float, float]:
     process = psutil.Process()
     cpu = process.cpu_percent()
     ram = process.memory_info().rss / 1024 / 1024
     vram = torch.cuda.memory_allocated() / 1024 / 1024
-    logger.info(f"Usage: {cpu=}%, {ram=}MiB, {vram=}MiB.")
+    return cpu, ram, vram
+
+def log_resource_usage():
+    cpu, ram, vram = get_resource_usage()
+    logger.info(f"usage: {cpu=}%, {ram=}MiB, {vram=}MiB")

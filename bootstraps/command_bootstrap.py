@@ -1,4 +1,4 @@
-from tasks.basic import greet, exit_vc, wiki
+from tasks.basic import greet, exit_vc, wiki, usage
 from tasks.music import play_music, next_music, pause_music, resume_music, list_music, music_volume
 from tasks.assistant import start_assistant, stop_assistant
 from tasks.info import info_creator, info_name, info_functions
@@ -24,5 +24,6 @@ def command_bootstrap():
     engine.add('info', 'i')(info_creator)
     engine.add('name', 'n')(info_name)
     engine.add('functions', 'func', 'f')(info_functions)
+    engine.add('usage', 'u')(usage)
 
     return command_handler

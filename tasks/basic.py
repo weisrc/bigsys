@@ -1,4 +1,4 @@
-from utils import Context
+from utils import Context, get_resource_usage
 import wikipedia
 
 async def greet(ctx: Context, name: str):
@@ -18,5 +18,6 @@ async def exit_vc(ctx: Context):
 async def wiki(ctx: Context, search: str):
     await ctx.reply(f'According to Wikipedia, {wikipedia.summary(search, sentences=1)}')
 
-async def ligma(ctx: Context):
-    await ctx.reply('Ligma balls')
+async def usage(ctx: Context):
+    cpu, ram, vram = await get_resource_usage()
+    await ctx.reply(f'Processor usage is {cpu:.0f}%, memory usage is {ram:.0f}MiB and CUDA memory usage is {vram:.0f}MiB')

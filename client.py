@@ -12,7 +12,7 @@ l = get_logger(__name__)
 @client.event
 async def on_ready():
     l.info(f'logged on as {client.user}')
-    log_resource_usage()
+    await log_resource_usage()
 
 
 message_handlers = []

@@ -1,5 +1,5 @@
 from .vc_utils import attempt_vc_connect
-from utils import Context
+from utils import Context, normalize_tts_text
 from audio.multi_sink import MultiSink
 from audio.assistant_listener import AssistantListener
 from audio.utils import get_audio_spec
@@ -24,7 +24,7 @@ class AssistantContext(Context):
         tts_text = EXTRA_RE.sub('', text)
         if self.message.guild.voice_client:
             self.multi_source.add(f'assistant_{self.message.author.id}',
-                                  get_tts_audio_source(tts_text, lang=self.lang))
+                                  get_tts_audio_source(normalize_tts_text(tts_text), lang=self.lang))
         await super().reply(f'> {self.content}\n{text}')
 
 

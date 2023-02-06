@@ -67,13 +67,23 @@ def get_logger(name: str):
     return logger.getChild(name)
 
 
-def get_resource_usage() -> Tuple[float, float, float]:
-    process = psutil.Process()
+process = psutil.Process()
+MB = 1000 * 1000
+
+
+async def get_resource_usage() -> Tuple[float, float, float]:
+    process.cpu_percent()
+    await asyncio.sleep(1)
     cpu = process.cpu_percent()
-    ram = process.memory_info().rss / 1024 / 1024
-    vram = torch.cuda.memory_allocated() / 1024 / 1024
+    ram = process.memory_info().rss / MB
+    vram = torch.cuda.memory_allocated() / MB
     return cpu, ram, vram
 
-def log_resource_usage():
-    cpu, ram, vram = get_resource_usage()
-    logger.info(f"usage: {cpu=}%, {ram=}MiB, {vram=}MiB")
+
+async def log_resource_usage():
+    cpu, ram, vram = await get_resource_usage()
+    logger.info(f"usage: {cpu=}%, {ram=}MB, {vram=}MB")
+
+
+def normalize_tts_text(text: str) -> str:
+    return text.replace('MB', ' megabytes').replace('%', ' percent')

@@ -57,7 +57,7 @@ class Context:
 logger = logging.getLogger("bigsys")
 logger.propagate = False
 fmt = '%(asctime)s %(name)s %(levelname)s %(message).80s'
-coloredlogs.install(fmt=fmt, logger=logger)
+coloredlogs.install(fmt=fmt, logger=logger, level='DEBUG')
 discord_logger = logging.getLogger("discord")
 discord_logger.propagate = False
 coloredlogs.install(fmt=fmt, logger=discord_logger)

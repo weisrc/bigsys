@@ -9,6 +9,6 @@ async def command_handler(ctx: Context, next):
     if not command:
         return next()
     
-    l.debug(f'Found command {command}')
+    l.debug(f'found command {command}')
     func, args = command
     await func(ctx, **args)

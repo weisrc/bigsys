@@ -53,13 +53,13 @@ class MultiSource(AudioSource):
             raise Exception("MultiSource does not support opus sources")
         if self.has(name):
             self.remove(name)
-        l.debug(f"Adding source {name}")
+        l.debug(f"adding source {name}")
         self.entries[name] = SourceEntry(source, volume, on_end)
         self.update_play_state()
 
     def remove(self, name: str):
         if name in self.entries:
-            l.debug(f"Removing source {name}")
+            l.debug(f"removing source {name}")
             entry = self.entries[name]
             self.voice_client.loop.create_task(entry.on_end())
             entry.source.cleanup()
@@ -77,10 +77,10 @@ class MultiSource(AudioSource):
 
     def update_play_state(self):
         if self.should_play():
-            l.debug("Resuming voice client")
+            l.debug("resuming voice client")
             self.voice_client.resume()
         else:
-            l.debug("Pausing voice client")
+            l.debug("pausing voice client")
             self.voice_client.pause()
 
     def set_paused(self, name: str, paused: bool):

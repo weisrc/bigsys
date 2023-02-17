@@ -12,7 +12,7 @@ async def intent_handler(ctx: Context, next):
         return next()
     func, answers, score, answer_scores, questions = intent_out
 
-    l.debug(f'Found {func=}, {score=}, {answers=}')
+    l.debug(f'found {func=}, {score=}, {answers=}')
     if score < INTENT_THRESHOLD:
         return next()
 

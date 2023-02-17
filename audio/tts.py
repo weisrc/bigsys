@@ -3,6 +3,7 @@ import io
 from discord.player import PCMAudio
 from espnet2.bin.tts_inference import Text2Speech
 from torchaudio.transforms import PitchShift
+from functools import lru_cache
 
 from utils import get_logger
 
@@ -16,13 +17,23 @@ resampler = get_resampler(22050, 48000)
 shifter = PitchShift(22050, 2)
 
 
-def get_tts_audio_source(text: str, lang='en') -> PCMAudio:
+
+
+@lru_cache(maxsize=64)
+def get_tts_audio_mono(text: str, lang='en') -> bytes:
     mono = model(text)['wav']
     mono = shifter(mono)
-    mono = resampler(mono)
-    pcm = float32_to_int16(mono)
+    return mono
+    
+
+def get_tts_audio_source(text: str, lang='en') -> PCMAudio:
     buf = io.BytesIO()
-    buf.write(mono_to_stereo(pcm).numpy().tobytes())
+    mono = get_tts_audio_mono(text, lang)
+    mono = resampler(mono)
+    mono = float32_to_int16(mono)
+    raw = mono_to_stereo(mono).numpy().tobytes()
+    l.debug(f'generated audio length: {len(raw)}')
+    buf.write(raw)
     buf.seek(0)
     return PCMAudio(buf)
 

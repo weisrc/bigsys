@@ -26,7 +26,7 @@ class MultiSink(discord.sinks.core.Sink):
             self.on_should_stop()
 
     def cleanup(self):
-        l.debug("Cleaning up multisink")
+        l.debug("cleaning up multisink")
         for al in list(self.listeners):
             self.remove(al)
 

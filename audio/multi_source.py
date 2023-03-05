@@ -1,11 +1,11 @@
-from typing import Dict
-from discord.player import AudioSource
-from discord.opus import Encoder
 from dataclasses import dataclass
-from discord.voice_client import VoiceClient
+from typing import Callable, Dict
+
 import torch
-from typing import Callable
-from .utils import get_audio_spec
+from discord.opus import Encoder
+from discord.player import AudioSource
+from discord.voice_client import VoiceClient
+
 from utils import get_logger
 
 FRAME_SIZE = Encoder.FRAME_SIZE
@@ -17,7 +17,7 @@ multi_sources = {}
 
 def get_multi_source(voice_client: VoiceClient):
     id = voice_client.guild.id
-    multi_source = multi_sources.get(id)
+    multi_source: MultiSource = multi_sources.get(id)
 
     if not multi_source:
         multi_source = MultiSource(voice_client)
@@ -38,15 +38,16 @@ class SourceEntry:
     on_end: Callable
     paused: bool = False
 
+
 async def NULL_ON_END():
     pass
+
 
 class MultiSource(AudioSource):
 
     def __init__(self, voice_client: VoiceClient):
         self.entries: Dict[str, SourceEntry] = {}
         self.voice_client = voice_client
-        self.audio_spec = get_audio_spec(voice_client)
 
     def add(self, name: str, source: AudioSource, volume: float = 1, on_end: Callable = NULL_ON_END):
         if source.is_opus():
@@ -63,7 +64,8 @@ class MultiSource(AudioSource):
             entry = self.entries[name]
             self.voice_client.loop.create_task(entry.on_end())
             entry.source.cleanup()
-            del self.entries[name]
+            if name in self.entries:
+                del self.entries[name]
         self.update_play_state()
 
     def has(self, name: str):

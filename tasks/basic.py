@@ -1,8 +1,11 @@
 from utils import Context, get_resource_usage
 import wikipedia
+from datetime import datetime
+
 
 async def greet(ctx: Context, name: str):
     await ctx.reply(f'Hello {name}!')
+
 
 async def exit_vc(ctx: Context):
     voice_client = ctx.message.guild.voice_client
@@ -15,9 +18,21 @@ async def exit_vc(ctx: Context):
     await voice_client.disconnect()
     await ctx.reply('Bye bye!')
 
+
 async def wiki(ctx: Context, search: str):
     await ctx.reply(f'According to Wikipedia, {wikipedia.summary(search, sentences=1)}')
 
+
 async def usage(ctx: Context):
     cpu, ram, vram = await get_resource_usage()
-    await ctx.reply(f'Processor usage is {cpu:.0f}%, memory usage is {ram:.0f}MiB and CUDA memory usage is {vram:.0f}MiB')
+    await ctx.reply(f'Processor usage is {cpu:.0f}%, ' +
+                    f'memory usage is {ram:.0f}MB and ' +
+                    f'CUDA memory usage is {vram:.0f}MB')
+
+
+async def time(ctx: Context):
+    await ctx.reply(datetime.now().strftime("It is now %-I:%-M %p"))
+
+
+async def date(ctx: Context):
+    await ctx.reply(datetime.now().strftime("Today is %A, %B %-d, %Y"))

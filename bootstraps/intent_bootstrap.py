@@ -1,4 +1,4 @@
-from tasks.basic import greet, exit_vc, wiki, usage
+from tasks.basic import greet, exit_vc, wiki, usage, time, date
 from tasks.music import play_music, next_music, pause_music, resume_music, list_music, music_volume
 from tasks.assistant import start_assistant, stop_assistant
 from tasks.info import info_creator, info_name, info_functions
@@ -36,6 +36,8 @@ def intent_bootstrap():
     engine.add('info name', 'what is your name?', 'why are you called bigsys')(info_name)
     engine.add('info functions', 'what can you do', 'what are your functions')(info_functions)
     engine.add('what is the resource usage')(usage)
+    engine.add('what time is it', 'what is the time')(time)
+    engine.add('what date is it', 'what is the date')(date)
 
     l.info('bootstrapped intents')
 

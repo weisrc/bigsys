@@ -51,7 +51,11 @@ class Context:
         self.message: discord.Message = message
 
     async def reply(self, text: str):
-        await self.message.reply(denormalize(text, self.mentions))
+        denorm_text = denormalize(text, self.mentions)
+        if self.client.get_message(self.message.id):
+            await self.message.reply(denorm_text)
+        else:
+            await self.message.channel.send(f"Replying to <@{self.message.author.id}>:\n{denorm_text}")
 
 
 logger = logging.getLogger("bigsys")

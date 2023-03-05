@@ -29,7 +29,8 @@ class AssistantListener(Listener):
         super().__init__(sleep_time)
         self.audio_spec = audio_spec
         self.detectors: Dict[int, WakeWordDetector] = {}
-        self.on_detects: Dict[int, Callable] = {}
+        self.on_detect: Dict[int, Callable] = {}
+        self.on_transcribe: Dict[int, Callable] = {}
         self.on_transcript: Dict[int, Callable] = {}
         self.transcript_user_id: Union[int, None] = None
         self.transcript_tensors: List[bytes] = []
@@ -42,20 +43,24 @@ class AssistantListener(Listener):
     def is_empty(self):
         return not len(self.detectors)
 
-    def add(self, user_id: int, on_detect: Callable, on_transcript: Callable):
+    def add(self, user_id: int, on_detect: Callable, on_transcribe: Callable, on_transcript: Callable):
         self.detectors[user_id] = WakeWordDetector(self.audio_spec)
-        self.on_detects[user_id] = on_detect
+        self.on_detect[user_id] = on_detect
+        self.on_transcribe[user_id] = on_transcribe
         self.on_transcript[user_id] = on_transcript
 
     def remove(self, user_id: int):
         del self.detectors[user_id]
-        del self.on_detects[user_id]
+        del self.on_detect[user_id]
+        del self.on_transcribe[user_id]
         del self.on_transcript[user_id]
         if user_id is self.transcript_user_id:
             self.transcript_user_id = None
             self.transcript_tensors = []
 
     def transcribe(self, loop: asyncio.AbstractEventLoop):
+        loop.create_task(
+            self.on_transcribe[self.transcript_user_id]())
         result = ""
         if len(self.transcript_tensors):
             pcm = torch.cat(self.transcript_tensors)
@@ -70,7 +75,7 @@ class AssistantListener(Listener):
         self.transcript_user_id = None
         self.transcript_tensors = []
 
-    def start_transcribe(self, user_id: int):
+    def listen(self, user_id: int):
         self.transcript_tensors = []
         self.transcript_user_id = user_id
         self.last_voice_activity = time.time()
@@ -108,4 +113,4 @@ class AssistantListener(Listener):
         user_id = await execute(self.sync_process, asyncio.get_running_loop())
         if user_id is None:
             return
-        await self.on_detects[user_id]()
+        await self.on_detect[user_id]()

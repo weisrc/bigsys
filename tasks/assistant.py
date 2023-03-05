@@ -7,12 +7,14 @@ from audio.multi_source import get_multi_source, MultiSource
 from audio.tts import get_tts_audio_source
 from handlers.intent_handler import intent_handler
 from handlers.converse_handler import converse_handler
+from discord import FFmpegPCMAudio
 import re
 from typing import Dict
 
 assistants: Dict[int, AssistantListener] = {}
 
 EXTRA_RE = re.compile(r'\([^)]*\)')
+
 
 class AssistantContext(Context):
     def __init__(self, content: str, ctx: Context, multi_source: MultiSource):
@@ -64,9 +66,18 @@ async def start_assistant(ctx: Context):
     if not assistant.has(ctx.message.author.id):
         async def on_detect():
             async def on_end():
-                assistant.start_transcribe(ctx.message.author.id)
-            multi_source.add(f'assistant_{ctx.message.author.id}',
-                             get_tts_audio_source(f"What's up {ctx.message.author.name}"), 1, on_end)
+                assistant.listen(ctx.message.author.id)
+            # source = get_tts_audio_source(
+            #     f"What's up {ctx.message.author.name}")
+            source = FFmpegPCMAudio('assets/discord-undeafen.mp3')
+            multi_source.add(f'assistant_signal_{ctx.message.author.id}',
+                             source, 0.3, on_end)
+            
+        async def on_process():
+            source = FFmpegPCMAudio('assets/discord-deafen.mp3')
+            multi_source.add(f'assistant_signal_{ctx.message.author.id}',
+                             source, 0.3)
+            pass
 
         async def on_transcript(text: str):
             do_next = False
@@ -83,7 +94,7 @@ async def start_assistant(ctx: Context):
             if do_next:
                 await converse_handler(actx, next)
 
-        assistant.add(ctx.message.author.id, on_detect, on_transcript)
+        assistant.add(ctx.message.author.id, on_detect, on_process, on_transcript)
         await ctx.reply(f'Voice assistant mode activated! Say BigSys!')
     else:
         await ctx.reply('Voice assistant mode is already activated!')

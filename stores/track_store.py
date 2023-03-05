@@ -2,13 +2,13 @@ from asyncio import get_event_loop
 from dataclasses import dataclass
 from random import shuffle
 from typing import Dict, List
-from utils import Context
 
-import youtube_dl
+import yt_dlp
 
 from params import YTDL_OPTIONS
+from utils import Context
 
-ytdl = youtube_dl.YoutubeDL(YTDL_OPTIONS)
+ytdl = yt_dlp.YoutubeDL(YTDL_OPTIONS)
 
 
 async def youtube(search: str):

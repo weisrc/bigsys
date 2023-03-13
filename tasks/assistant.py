@@ -1,12 +1,11 @@
+from client import handle_message
 from .vc_utils import attempt_vc_connect
-from utils import Context
+from utils import Context, execute
 from audio.multi_sink import MultiSink
 from audio.assistant_listener import AssistantListener
 from audio.utils import get_audio_spec
 from audio.multi_source import get_multi_source, MultiSource
 from audio.tts import get_tts_audio_source
-from handlers.intent_handler import intent_handler
-from handlers.converse_handler import converse_handler
 from discord import FFmpegPCMAudio
 import re
 from typing import Dict
@@ -26,11 +25,11 @@ class AssistantContext(Context):
         self.pcm = pcm
 
     async def reply(self, text):
+        await super().reply(f'> {self.content}\n{text}')
         tts_text = EXTRA_RE.sub('', text)
         if self.message.guild.voice_client:
-            self.multi_source.add(f'assistant_{self.message.author.id}',
-                                  get_tts_audio_source(tts_text, lang=self.lang))
-        await super().reply(f'> {self.content}\n{text}')
+            audio = await execute(get_tts_audio_source, tts_text, self.lang)
+            self.multi_source.add(f'assistant_{self.message.author.id}', audio)
 
 
 async def start_assistant(ctx: Context):
@@ -83,19 +82,13 @@ async def start_assistant(ctx: Context):
             pass
 
         async def on_transcript(text: str, pcm: torch.Tensor):
-            do_next = False
             actx = AssistantContext(text.strip(), ctx, multi_source, pcm)
 
             if len(actx.content.strip()) == 0:
                 actx.content = '[silence]'
                 return await actx.reply("Sorry, I didn't hear anything")
 
-            def next():
-                nonlocal do_next
-                do_next = True
-            await intent_handler(actx, next)
-            if do_next:
-                await converse_handler(actx, next)
+            await handle_message(actx)
 
         assistant.add(ctx.message.author.id, on_detect,
                       on_transcribe, on_transcript)

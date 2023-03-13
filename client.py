@@ -30,6 +30,16 @@ def message_filter(func: Callable):
     return func
 
 
+async def handle_message(ctx: Context):
+    for handler in message_handlers:
+        stop = True
+        def next(): nonlocal stop; stop = False
+        await handler(ctx, next)
+        if stop:
+            return
+    await ctx.reply(f"Sorry, I don't understand.")
+
+
 @client.event
 async def on_message(message: discord.Message):
 
@@ -43,9 +53,4 @@ async def on_message(message: discord.Message):
             return
 
     async with message.channel.typing():
-        for handler in message_handlers:
-            stop = True
-            def next(): nonlocal stop; stop = False
-            await handler(ctx, next)
-            if stop:
-                return
+        await handle_message(ctx)

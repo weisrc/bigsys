@@ -1,12 +1,12 @@
 from transformers import pipeline
 
-from utils import Context, get_logger
+from utils import Context, get_logger, profile_resource_usage
 
 l = get_logger(__name__)
 
-l.info('loading story generator')
-story_gen = pipeline("text-generation", "pranavpsv/gpt2-genre-story-generator")
-l.info('loaded story generator')
+with profile_resource_usage('story generator'):
+    story_gen = pipeline(
+        "text-generation", "pranavpsv/gpt2-genre-story-generator")
 
 
 async def generate_story(ctx: Context, genre: str, prompt: str,

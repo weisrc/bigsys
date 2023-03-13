@@ -3,15 +3,14 @@ from transformers import pipeline
 from sentence_transformers import SentenceTransformer
 import torch
 import asyncio
-from utils import get_logger
+from utils import get_logger, profile_resource_usage
 
 l = get_logger(__name__)
-l.info('loading sentence transformer model')
-st_model = SentenceTransformer('all-MiniLM-L6-v2')
-l.info('loading question answering model')
-qa_model = pipeline("question-answering", model="deepset/roberta-base-squad2",
-                    tokenizer="deepset/roberta-base-squad2")
-l.info('loaded models')
+
+with profile_resource_usage('intent models'):
+    st_model = SentenceTransformer('all-MiniLM-L6-v2')
+    qa_model = pipeline("question-answering", model="deepset/roberta-base-squad2",
+                        tokenizer="deepset/roberta-base-squad2")
 
 INTENT_TYPE = Tuple[torch.Tensor, Dict[str, str], Callable]
 
@@ -53,6 +52,6 @@ class IntentEngine:
             answers[varname] = qa_out['answer']
             answer_scores[varname] = qa_out['score']
         return func, answers, best_score, answer_scores, questions
-    
+
     async def get_async(self, text):
         return await asyncio.get_event_loop().run_in_executor(None, self.get, text)

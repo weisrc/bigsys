@@ -1,10 +1,12 @@
-from utils import execute, Context
+from utils import execute, Context, get_logger, profile_resource_usage
 from params import TOXICITY_THRESHOLD, DEVICE
-
 
 from detoxify import Detoxify
 
-detox = Detoxify('multilingual', device=DEVICE)
+l = get_logger(__name__)
+
+with profile_resource_usage("toxicity model"):
+    detox = Detoxify('multilingual', device=DEVICE)
 
 
 async def toxicity_filter(ctx: Context, next):

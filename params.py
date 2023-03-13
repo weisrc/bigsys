@@ -23,7 +23,7 @@ FFMPEG_OPTIONS = {
     'options': '-vn'
 }
 
-TOXICITY_THRESHOLD = 0.9
+TOXICITY_THRESHOLD = 1
 
 DEVICE = environ.get(
     'TORCH_DEVICE', 'cuda' if torch.cuda.is_available() else 'cpu')

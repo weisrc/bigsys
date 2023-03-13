@@ -8,7 +8,7 @@ from datasets import load_dataset
 
 
 from audio.utils import float32_to_int16, get_resampler, mono_to_stereo
-from utils import get_logger
+from utils import profile_resource_usage, get_logger
 
 import re
 from num2words import num2words
@@ -16,13 +16,14 @@ from num2words import num2words
 
 l = get_logger(__name__)
 
-l.info('loading text to speech model')
-classifier = EncoderClassifier.from_hparams(
-    source="speechbrain/spkrec-xvect-voxceleb")
-processor = SpeechT5Processor.from_pretrained("microsoft/speecht5_tts")
-model = SpeechT5ForTextToSpeech.from_pretrained("microsoft/speecht5_tts")
-vocoder = SpeechT5HifiGan.from_pretrained("microsoft/speecht5_hifigan")
-l.info('loaded text to speech model')
+with profile_resource_usage("tts model"):
+    classifier = EncoderClassifier.from_hparams(
+        source="speechbrain/spkrec-xvect-voxceleb")
+    processor = SpeechT5Processor.from_pretrained("microsoft/speecht5_tts")
+    model = SpeechT5ForTextToSpeech.from_pretrained("microsoft/speecht5_tts")
+    vocoder = SpeechT5HifiGan.from_pretrained("microsoft/speecht5_hifigan")
+
+
 resampler = get_resampler(16000, 48000)
 embeddings_dataset = load_dataset(
     "Matthijs/cmu-arctic-xvectors", split="validation")

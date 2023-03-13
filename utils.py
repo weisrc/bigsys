@@ -95,5 +95,36 @@ def get_uptime() -> float:
     start = process.create_time()
     return time.time() - start
 
+
 def log_uptime():
     logger.info(f"uptime: {get_uptime()}s")
+
+
+class ResourceUsageProfiler:
+
+    start_time: float
+    start_ram: float
+    start_vram: float
+
+    def __init__(self, name: str):
+        self.name = name
+
+    def __enter__(self):
+        self.start_time = time.time()
+        self.start_ram = process.memory_info().rss / MB
+        self.start_vram = torch.cuda.memory_allocated() / MB
+        return self
+
+    def __exit__(self, _exc_type, _exc_value, _traceback):
+        end_time = time.time()
+        end_ram = process.memory_info().rss / MB
+        end_vram = torch.cuda.memory_allocated() / MB
+
+        logger.info(f"loaded {self.name}: " +
+                    f"time={end_time-self.start_time:.2f}s, " +
+                    f"ram={end_ram-self.start_ram:.2f}MB, " +
+                    f"vram={end_vram-self.start_vram:.2f}MB")
+
+
+def profile_resource_usage(name: str):
+    return ResourceUsageProfiler(name)

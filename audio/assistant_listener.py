@@ -1,6 +1,6 @@
 from typing import Dict, Callable, List, Union
 
-from utils import execute
+from utils import execute, profile_resource_usage
 
 from .utils import AudioSpec, raw_to_tensor, float32_to_int16, get_resampler
 from .listener import Listener
@@ -16,9 +16,10 @@ import whisper
 from utils import get_logger
 
 l = get_logger(__name__)
-l.info('loading speech recognition model')
-transcribe = whisper.load_model('tiny.en', device=params.DEVICE)
-l.info("loaded speech recognition model")
+
+with profile_resource_usage("asr model"):
+    transcribe = whisper.load_model('tiny.en', device=params.DEVICE)
+
 
 vad = webrtcvad.Vad(3)
 VOICE_ACTIVITY_TIMEOUT = 2

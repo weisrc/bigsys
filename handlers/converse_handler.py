@@ -1,13 +1,12 @@
 from transformers import Conversation, pipeline
 from utils import Context, execute
-from utils import get_logger
+from utils import get_logger, profile_resource_usage
 
 l = get_logger(__name__)
 
-l.info('loading conversational model')
-converse = pipeline("conversational", model="facebook/blenderbot-400M-distill",
-                    tokenizer="facebook/blenderbot-400M-distill")
-l.info('loaded conversational model')
+with profile_resource_usage('conversational model'):
+    converse = pipeline("conversational", model="facebook/blenderbot-400M-distill",
+                        tokenizer="facebook/blenderbot-400M-distill")
 
 conversation = Conversation()
 

@@ -1,63 +1,79 @@
 import io
+from discord import PCMAudio
+from transformers import SpeechT5Processor, SpeechT5ForTextToSpeech, SpeechT5HifiGan
+import torch
+from speechbrain.pretrained import EncoderClassifier
+import torch.nn.functional as F
+from datasets import load_dataset
 
-from discord.player import PCMAudio
-from espnet2.bin.tts_inference import Text2Speech
-from torchaudio.transforms import PitchShift
-from functools import lru_cache
 
+from audio.utils import float32_to_int16, get_resampler, mono_to_stereo
 from utils import get_logger
 
-from .utils import float32_to_int16, get_resampler, mono_to_stereo
+import re
+from num2words import num2words
+
 
 l = get_logger(__name__)
+
 l.info('loading text to speech model')
-model = Text2Speech.from_pretrained("espnet/kan-bayashi_ljspeech_vits")
+classifier = EncoderClassifier.from_hparams(
+    source="speechbrain/spkrec-xvect-voxceleb")
+processor = SpeechT5Processor.from_pretrained("microsoft/speecht5_tts")
+model = SpeechT5ForTextToSpeech.from_pretrained("microsoft/speecht5_tts")
+vocoder = SpeechT5HifiGan.from_pretrained("microsoft/speecht5_hifigan")
 l.info('loaded text to speech model')
-resampler = get_resampler(22050, 48000)
-shifter = PitchShift(22050, 2)
+resampler = get_resampler(16000, 48000)
+embeddings_dataset = load_dataset(
+    "Matthijs/cmu-arctic-xvectors", split="validation")
 
 
+def get_voice_embed(pcm: torch.Tensor):
+    with torch.no_grad():
+        embeddings = classifier.encode_batch(pcm)
+        embeddings = F.normalize(embeddings, dim=2)
+    return embeddings.squeeze(0)
 
 
-@lru_cache(maxsize=64)
-def get_tts_audio_mono(text: str, lang='en') -> bytes:
-    mono = model(text)['wav']
-    mono = shifter(mono)
-    return mono
-    
+def set_voice_embed(new_embed: torch.Tensor):
+    global embed
+    embed = new_embed
+    l.debug(f'new embed shape: {embed.shape}')
 
-def get_tts_audio_source(text: str, lang='en') -> PCMAudio:
+
+def set_voice(pcm: torch.Tensor):
+    set_voice_embed(get_voice_embed(pcm))
+
+
+def get_tts_audio_mono(text: str, lang='en') -> torch.Tensor:
+    inputs = processor(text=normalize_tts_text(text), return_tensors="pt")
+
+    with torch.no_grad():
+        return model.generate_speech(inputs["input_ids"], embed, vocoder=vocoder)
+
+
+def get_tts_audio_source(text: str, lang='en', cache=False) -> PCMAudio:
     buf = io.BytesIO()
     mono = get_tts_audio_mono(text, lang)
     mono = resampler(mono)
     mono = float32_to_int16(mono)
     raw = mono_to_stereo(mono).numpy().tobytes()
-    l.debug(f'generated audio length: {len(raw)}')
     buf.write(raw)
     buf.seek(0)
     return PCMAudio(buf)
 
-# import gtts
-# import miniaudio
+# set_voice(torchaudio.load("wei.wav")[0].squeeze())
 
-# def get_tts_audio_source(text: str, lang='en') -> PCMAudio:
-#     buffer = io.BytesIO()
-#     gtts.gTTS(text, lang=lang).write_to_fp(buffer)
-#     buffer.seek(0)
-#     decoded = miniaudio.decode(buffer.read(), sample_rate=48000)
-#     decoded_buffer = io.BytesIO()
-#     decoded_buffer.write(decoded.samples)
-#     decoded_buffer.seek(0)
-#     return PCMAudio(decoded_buffer)
 
-# import pyopenjtalk
-# import numpy as np
+def set_voice_from_dataset(i: int):
+    global embed
+    embed = torch.tensor(embeddings_dataset[i]["xvector"]).unsqueeze(0)
 
-# def get_tts_audio_source(text: str, lang='en') -> PCMAudio:
-#     decoded_buffer = io.BytesIO()
-#     mono: np.ndarray
-#     mono, _sr = pyopenjtalk.tts(text)
-#     stereo = np.stack((mono, mono), axis=1)
-#     decoded_buffer.write(stereo.astype(np.int16).tobytes())
-#     decoded_buffer.seek(0)
-#     return PCMAudio(decoded_buffer)
+
+def normalize_tts_text(text: str) -> str:
+    text = re.sub(
+        r"(\d+)", lambda x: num2words(int(x.group(0))), text)
+    return text.replace('MB', ' megabytes').replace('%', ' percent')
+
+
+set_voice_from_dataset(7306)

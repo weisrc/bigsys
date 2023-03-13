@@ -2,7 +2,7 @@ from typing import Callable
 
 import discord
 
-from utils import Context, get_logger, log_resource_usage
+from utils import Context, get_logger, log_resource_usage, log_uptime
 
 client = discord.Bot(intents=discord.Intents.all())
 
@@ -13,6 +13,7 @@ l = get_logger(__name__)
 async def on_ready():
     l.info(f'logged on as {client.user}')
     await log_resource_usage()
+    log_uptime()
 
 
 message_handlers = []

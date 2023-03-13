@@ -1,5 +1,5 @@
 from .vc_utils import attempt_vc_connect
-from utils import Context, normalize_tts_text
+from utils import Context
 from audio.multi_sink import MultiSink
 from audio.assistant_listener import AssistantListener
 from audio.utils import get_audio_spec
@@ -10,6 +10,7 @@ from handlers.converse_handler import converse_handler
 from discord import FFmpegPCMAudio
 import re
 from typing import Dict
+import torch
 
 assistants: Dict[int, AssistantListener] = {}
 
@@ -17,16 +18,18 @@ EXTRA_RE = re.compile(r'\([^)]*\)')
 
 
 class AssistantContext(Context):
-    def __init__(self, content: str, ctx: Context, multi_source: MultiSource):
+
+    def __init__(self, content: str, ctx: Context, multi_source: MultiSource, pcm: torch.Tensor = None):
         super().__init__(ctx.client, ctx.message)
         self.content = content
         self.multi_source = multi_source
+        self.pcm = pcm
 
     async def reply(self, text):
         tts_text = EXTRA_RE.sub('', text)
         if self.message.guild.voice_client:
             self.multi_source.add(f'assistant_{self.message.author.id}',
-                                  get_tts_audio_source(normalize_tts_text(tts_text), lang=self.lang))
+                                  get_tts_audio_source(tts_text, lang=self.lang))
         await super().reply(f'> {self.content}\n{text}')
 
 
@@ -67,21 +70,21 @@ async def start_assistant(ctx: Context):
         async def on_detect():
             async def on_end():
                 assistant.listen(ctx.message.author.id)
-            # source = get_tts_audio_source(
-            #     f"What's up {ctx.message.author.name}")
-            source = FFmpegPCMAudio('assets/discord-undeafen.mp3')
+            source = get_tts_audio_source(
+                f"What's up {ctx.message.author.name}")
+            # source = FFmpegPCMAudio('assets/discord-undeafen.mp3')
             multi_source.add(f'assistant_signal_{ctx.message.author.id}',
                              source, 0.3, on_end)
-            
-        async def on_process():
+
+        async def on_transcribe():
             source = FFmpegPCMAudio('assets/discord-deafen.mp3')
             multi_source.add(f'assistant_signal_{ctx.message.author.id}',
                              source, 0.3)
             pass
 
-        async def on_transcript(text: str):
+        async def on_transcript(text: str, pcm: torch.Tensor):
             do_next = False
-            actx = AssistantContext(text.strip(), ctx, multi_source)
+            actx = AssistantContext(text.strip(), ctx, multi_source, pcm)
 
             if len(actx.content.strip()) == 0:
                 actx.content = '[silence]'
@@ -94,7 +97,8 @@ async def start_assistant(ctx: Context):
             if do_next:
                 await converse_handler(actx, next)
 
-        assistant.add(ctx.message.author.id, on_detect, on_process, on_transcript)
+        assistant.add(ctx.message.author.id, on_detect,
+                      on_transcribe, on_transcript)
         await ctx.reply(f'Voice assistant mode activated! Say BigSys!')
     else:
         await ctx.reply('Voice assistant mode is already activated!')

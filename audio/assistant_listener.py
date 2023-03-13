@@ -64,14 +64,15 @@ class AssistantListener(Listener):
         result = ""
         if len(self.transcript_tensors):
             pcm = torch.cat(self.transcript_tensors)
+            pcm = self.resampler(pcm)
             result = None
             try:
                 result = transcribe.transcribe(
-                    self.resampler(pcm), fp16=False, language='en')['text']
+                    pcm, fp16=False, language='en')['text']
             except Exception as e:
                 l.exception(e)
         loop.create_task(
-            self.on_transcript[self.transcript_user_id](result))
+            self.on_transcript[self.transcript_user_id](result, pcm))
         self.transcript_user_id = None
         self.transcript_tensors = []
 

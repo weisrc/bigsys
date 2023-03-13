@@ -1,19 +1,27 @@
-from tasks.basic import greet, exit_vc, wiki, usage, time, date
+from tasks.basic import greet, exit_vc, wiki, usage, time, date, uptime
 from tasks.music import play_music, next_music, pause_music, resume_music, list_music, music_volume
 from tasks.assistant import start_assistant, stop_assistant
 from tasks.info import info_creator, info_name, info_functions
+from tasks.voice import copy_voice, use_voice
 from handlers.intent_handler import engine, intent_handler
 from utils import get_logger
 
 l = get_logger(__name__)
 
+
 def intent_bootstrap():
     l.info('bootstrapping intents')
-    
+
     engine.add('say hello to someone', 'greet someone', name='to whom?')(greet)
-    engine.add('leave voice channel', 'exit voice channel', 'leave call')(exit_vc)
+    engine.add('leave voice channel',
+               'exit voice channel', 'leave call')(exit_vc)
     engine.add('wiki', 'wikipedia', 'search wikipedia', 'what is something?', 'what are something?',
                'who is someone?', search='what to search?')(wiki)
+    engine.add('what is the resource usage')(usage)
+    engine.add('how long has the bot been running',
+               'how old are you', 'what is the uptime')(uptime)
+    engine.add('what time is it', 'what is the time')(time)
+    engine.add('what date is it', 'what is the date')(date)
 
     engine.add('play', 'play music', 'play song',
                'can you play a song', search='play what song?')(play_music)
@@ -33,11 +41,13 @@ def intent_bootstrap():
                'stop voice assistant mode')(stop_assistant)
 
     engine.add('info creator', 'who created you', 'who made you')(info_creator)
-    engine.add('info name', 'what is your name?', 'why are you called bigsys')(info_name)
-    engine.add('info functions', 'what can you do', 'what are your functions')(info_functions)
-    engine.add('what is the resource usage')(usage)
-    engine.add('what time is it', 'what is the time')(time)
-    engine.add('what date is it', 'what is the date')(date)
+    engine.add('info name', 'what is your name?',
+               'why are you called bigsys')(info_name)
+    engine.add('info functions', 'what can you do',
+               'what are your functions')(info_functions)
+
+    engine.add('copy voice', 'copy my voice')(copy_voice)
+    engine.add('use voice number', index='which voice number?')(use_voice)
 
     l.info('bootstrapped intents')
 

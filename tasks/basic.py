@@ -1,4 +1,4 @@
-from utils import Context, get_resource_usage
+from utils import Context, get_resource_usage, get_uptime
 import wikipedia
 from datetime import datetime
 
@@ -27,12 +27,16 @@ async def usage(ctx: Context):
     cpu, ram, vram = await get_resource_usage()
     await ctx.reply(f'Processor usage is {cpu:.0f}%, ' +
                     f'memory usage is {ram:.0f}MB and ' +
-                    f'CUDA memory usage is {vram:.0f}MB')
+                    f'CUDA memory usage is {vram:.0f}MB.')
+
+
+async def uptime(ctx: Context):
+    await ctx.reply(f'I have been online for {int(get_uptime())} seconds.')
 
 
 async def time(ctx: Context):
-    await ctx.reply(datetime.now().strftime("It is now %-I:%-M %p"))
+    await ctx.reply(datetime.now().strftime("It is now %-H:%-M."))
 
 
 async def date(ctx: Context):
-    await ctx.reply(datetime.now().strftime("Today is %A, %B %-d, %Y"))
+    await ctx.reply(datetime.now().strftime("Today is %A, %B %-d, %Y."))

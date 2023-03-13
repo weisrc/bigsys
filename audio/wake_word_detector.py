@@ -4,10 +4,10 @@ from typing import List
 import pvporcupine
 import torch
 
-from .utils import (float32_to_int16, get_resampler, int16_to_float32,
-                    interleaved_to_mono, AudioSpec)
+from .utils import AudioSpec, float32_to_int16, get_resampler
 
 NULL_BYTES_512 = b'\x00' * 512
+
 
 class WakeWordDetector:
     def __init__(self, audio_spec: AudioSpec):

@@ -12,9 +12,9 @@ wikipedia
 webrtcvad
 gTTS
 miniaudio
-# on device tts
-espnet
-espnet_model_zoo
-pyopenjtalk
 coloredlogs
 psutil
+git+https://github.com/huggingface/transformers
+sentencepiece
+datasets
+accelerate

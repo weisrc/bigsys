@@ -1,6 +1,6 @@
 import logging
 import asyncio
-import re
+import time
 import warnings
 from typing import Dict, Tuple
 
@@ -8,6 +8,8 @@ import psutil
 import discord
 import coloredlogs
 import torch
+import re
+
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -60,7 +62,7 @@ class Context:
 
 logger = logging.getLogger("bigsys")
 logger.propagate = False
-fmt = '%(asctime)s %(name)s %(levelname)s %(message).80s'
+fmt = '%(asctime)s %(name)s %(levelname)s %(message).90s'
 coloredlogs.install(fmt=fmt, logger=logger, level='DEBUG')
 discord_logger = logging.getLogger("discord")
 discord_logger.propagate = False
@@ -89,5 +91,9 @@ async def log_resource_usage():
     logger.info(f"usage: {cpu=}%, {ram=}MB, {vram=}MB")
 
 
-def normalize_tts_text(text: str) -> str:
-    return text.replace('MB', ' megabytes').replace('%', ' percent')
+def get_uptime() -> float:
+    start = process.create_time()
+    return time.time() - start
+
+def log_uptime():
+    logger.info(f"uptime: {get_uptime()}s")

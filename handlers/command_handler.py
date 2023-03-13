@@ -10,5 +10,5 @@ async def command_handler(ctx: Context, next):
         return next()
     
     func, args = command
-    l.debug(f'found command {func.__name__} with {args}')
+    l.debug(f'{func.__name__} {args}')
     await func(ctx, **args)

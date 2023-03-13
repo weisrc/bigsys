@@ -53,16 +53,17 @@ class MultiSource(AudioSource):
         if source.is_opus():
             raise Exception("MultiSource does not support opus sources")
         if self.has(name):
-            self.remove(name)
+            self.remove(name, False)
         l.debug(f"adding source {name}")
         self.entries[name] = SourceEntry(source, volume, on_end)
         self.update_play_state()
 
-    def remove(self, name: str):
+    def remove(self, name: str, do_on_end: bool = True):
         if name in self.entries:
             l.debug(f"removing source {name}")
             entry = self.entries[name]
-            self.voice_client.loop.create_task(entry.on_end())
+            if do_on_end:
+                self.voice_client.loop.create_task(entry.on_end())
             entry.source.cleanup()
             if name in self.entries:
                 del self.entries[name]

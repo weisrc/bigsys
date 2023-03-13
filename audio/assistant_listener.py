@@ -63,6 +63,7 @@ class AssistantListener(Listener):
         loop.create_task(
             self.on_transcribe[self.transcript_user_id]())
         result = ""
+        pcm = None
         if len(self.transcript_tensors):
             pcm = torch.cat(self.transcript_tensors)
             pcm = self.resampler(pcm)

@@ -10,7 +10,7 @@ with profile_resource_usage('story generator'):
 
 
 async def generate_story(ctx: Context, genre: str, prompt: str,
-                         max_length: int = 100):
+                         max_length: int = 400):
     start = f'<BOS> <{genre}> '
     out = story_gen(f'{start}{prompt}', max_length=max_length)
     text: str = out[0]['generated_text']

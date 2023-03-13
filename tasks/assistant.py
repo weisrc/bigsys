@@ -6,7 +6,7 @@ from audio.assistant_listener import AssistantListener
 from audio.utils import get_audio_spec
 from audio.multi_source import get_multi_source, MultiSource
 from audio.tts import get_tts_audio_source
-from discord import FFmpegPCMAudio
+from discord import FFmpegPCMAudio, PCMAudio
 import re
 from typing import Dict
 import torch
@@ -14,6 +14,7 @@ import torch
 assistants: Dict[int, AssistantListener] = {}
 
 EXTRA_RE = re.compile(r'\([^)]*\)')
+SENTENCE_RE = re.compile(r'([^.!?]+[.!?]?)')
 
 
 class AssistantContext(Context):
@@ -28,8 +29,39 @@ class AssistantContext(Context):
         await super().reply(f'> {self.content}\n{text}')
         tts_text = EXTRA_RE.sub('', text)
         if self.message.guild.voice_client:
-            audio = await execute(get_tts_audio_source, tts_text, self.lang)
-            self.multi_source.add(f'assistant_{self.message.author.id}', audio)
+            sentences = []
+            for sentence in SENTENCE_RE.findall(tts_text):
+                sentence = sentence.strip()
+                if not sentence:
+                    continue
+                if not sentence.endswith('.'):
+                    sentence += '.'
+                sentences.append(sentence)
+
+            print(sentences)
+            audio: PCMAudio = None
+            played = False
+            async def on_end():
+                nonlocal audio, played
+                if audio:
+                    self.multi_source.add(f'assistant_{self.message.author.id}',
+                                        audio, on_end=on_end)
+                    audio = None
+                    played = True
+                else:
+                    played = False
+                if not sentences:
+                    return
+                sentence = sentences.pop(0)
+                if not sentence:
+                    return
+                print(f'generating {sentence}')
+                audio = await execute(get_tts_audio_source, sentence, self.lang)
+                print(f'generated {sentence}')
+                if not played:
+                    await on_end()
+                
+            await on_end()
 
 
 async def start_assistant(ctx: Context):

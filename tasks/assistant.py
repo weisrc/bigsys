@@ -8,7 +8,7 @@ from audio.multi_source import get_multi_source, MultiSource
 from audio.tts import get_tts_audio_source
 from discord import FFmpegPCMAudio, PCMAudio
 import re
-from typing import Dict
+from typing import Dict, List
 import torch
 
 assistants: Dict[int, AssistantListener] = {}
@@ -39,29 +39,24 @@ class AssistantContext(Context):
                 sentences.append(sentence)
 
             print(sentences)
-            audio: PCMAudio = None
-            played = False
+            audio_queue: List[PCMAudio] = []
+            playing = False
+
             async def on_end():
-                nonlocal audio, played
-                if audio:
-                    self.multi_source.add(f'assistant_{self.message.author.id}',
-                                        audio, on_end=on_end)
-                    audio = None
-                    played = True
-                else:
-                    played = False
-                if not sentences:
+                nonlocal audio_queue, playing
+                if not audio_queue:
+                    playing = False
                     return
-                sentence = sentences.pop(0)
-                if not sentence:
-                    return
-                print(f'generating {sentence}')
-                audio = await execute(get_tts_audio_source, sentence, self.lang)
-                print(f'generated {sentence}')
-                if not played:
+                playing = True
+                audio = audio_queue.pop(0)
+                self.multi_source.add(f'assistant_{self.message.author.id}',
+                                      audio, on_end=on_end)
+
+            for sentence in sentences:
+                new_audio = await execute(get_tts_audio_source, sentence, self.lang)
+                audio_queue.append(new_audio)
+                if not playing:
                     await on_end()
-                
-            await on_end()
 
 
 async def start_assistant(ctx: Context):
@@ -102,7 +97,7 @@ async def start_assistant(ctx: Context):
             async def on_end():
                 assistant.listen(ctx.message.author.id)
             source = get_tts_audio_source(
-                f"What's up {ctx.message.author.name}")
+                f"What's up {ctx.message.author.nick or ctx.message.author.name}", cache=True)
             # source = FFmpegPCMAudio('assets/discord-undeafen.mp3')
             multi_source.add(f'assistant_signal_{ctx.message.author.id}',
                              source, 0.3, on_end)

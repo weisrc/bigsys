@@ -5,6 +5,7 @@ import torch
 from speechbrain.pretrained import EncoderClassifier
 import torch.nn.functional as F
 from datasets import load_dataset
+from functools import lru_cache
 
 
 from audio.utils import float32_to_int16, get_resampler, mono_to_stereo
@@ -46,7 +47,12 @@ def set_voice(pcm: torch.Tensor):
     set_voice_embed(get_voice_embed(pcm))
 
 
-def get_tts_audio_mono(text: str, lang='en') -> torch.Tensor:
+@lru_cache(maxsize=16)
+def get_tts_audio_mono_cache(text: str, embed: torch.Tensor, lang='en') -> torch.Tensor:
+    return get_tts_audio_mono(text, embed, lang)
+
+
+def get_tts_audio_mono(text: str, embed: torch.Tensor, lang='en') -> torch.Tensor:
     inputs = processor(text=normalize_tts_text(text), return_tensors="pt")
 
     with torch.no_grad():
@@ -55,7 +61,8 @@ def get_tts_audio_mono(text: str, lang='en') -> torch.Tensor:
 
 def get_tts_audio_source(text: str, lang='en', cache=False) -> PCMAudio:
     buf = io.BytesIO()
-    mono = get_tts_audio_mono(text, lang)
+    mono = get_tts_audio_mono_cache(
+        text, embed, lang) if cache else get_tts_audio_mono(text, embed, lang)
     mono = resampler(mono)
     mono = float32_to_int16(mono)
     raw = mono_to_stereo(mono).numpy().tobytes()

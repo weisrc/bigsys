@@ -9,8 +9,6 @@ async def copy_voice(actx: AssistantContext):
     await actx.reply(f'Yes, I can copy your voice!')
 
 async def use_voice(actx: AssistantContext, index: str):
-    if not isinstance(actx, AssistantContext):
-        return await actx.reply(f'Sorry, this command only works with the voice assistant.')
     try :
         i = int(index.replace(',', ''))
     except ValueError:

@@ -18,3 +18,4 @@ git+https://github.com/huggingface/transformers
 sentencepiece
 datasets
 accelerate
+httpx

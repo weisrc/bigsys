@@ -4,6 +4,7 @@ from tasks.assistant import start_assistant, stop_assistant
 from tasks.info import info_creator, info_name, info_functions
 from tasks.voice import copy_voice, use_voice
 from tasks.story import generate_story
+from tasks.joke import joke
 from handlers.intent_handler import engine, intent_handler
 from utils import get_logger
 
@@ -51,6 +52,8 @@ def intent_bootstrap():
     engine.add('use voice number', index='which voice number?')(use_voice)
 
     engine.add('tell me a fantasy story about something', genre='what type of story?', prompt='what is the story about?')(generate_story)
+
+    engine.add('tell me a joke', 'say something funny')(joke)
 
     l.info('bootstrapped intents')
 

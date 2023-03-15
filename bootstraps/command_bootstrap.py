@@ -3,6 +3,7 @@ from tasks.music import play_music, next_music, pause_music, resume_music, list_
 from tasks.assistant import start_assistant, stop_assistant
 from tasks.info import info_creator, info_name, info_functions
 from tasks.story import generate_story
+from tasks.voice import use_voice
 from tasks.joke import joke
 from handlers.command_handler import engine, command_handler
 
@@ -29,6 +30,8 @@ def command_bootstrap():
     engine.add('info', 'i')(info_creator)
     engine.add('name', 'n')(info_name)
     engine.add('functions', 'func', 'f')(info_functions)
+
+    engine.add('voice', index='\d+')(use_voice)
 
     engine.add('story', genre='[a-z-]+', prompt='.+')(generate_story)
     engine.add('joke', 'j')(joke)

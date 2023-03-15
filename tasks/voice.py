@@ -1,5 +1,5 @@
+from audio.assistant_context import AssistantContext
 from audio.tts import set_voice, set_voice_from_dataset
-from tasks.assistant import AssistantContext
 
 
 async def copy_voice(actx: AssistantContext):
@@ -8,8 +8,9 @@ async def copy_voice(actx: AssistantContext):
     set_voice(actx.pcm)
     await actx.reply(f'Yes, I can copy your voice!')
 
+
 async def use_voice(actx: AssistantContext, index: str):
-    try :
+    try:
         i = int(index.replace(',', ''))
     except ValueError:
         return await actx.reply(f'Sorry, {index} is not a valid voice index.')

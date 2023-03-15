@@ -1,4 +1,5 @@
 import httpx
+from audio.sfx import DRUM_ROLL_SFX, RIMSHOT_SFX
 
 from utils import Context
 
@@ -11,4 +12,5 @@ async def joke(ctx: Context):
     data = response.json()
     setup = data['setup']
     punchline = data['punchline']
-    await ctx.reply(f'{setup}\n[Drum roll]\n{punchline}\n[Rimshot]')
+    text = '\n'.join([setup, DRUM_ROLL_SFX, punchline, RIMSHOT_SFX])
+    await ctx.reply(text)

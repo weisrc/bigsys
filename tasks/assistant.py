@@ -1,62 +1,17 @@
+from audio.assistant_context import AssistantContext
 from client import handle_message
 from .vc_utils import attempt_vc_connect
-from utils import Context, execute
+from utils import Context
 from audio.multi_sink import MultiSink
 from audio.assistant_listener import AssistantListener
 from audio.utils import get_audio_spec
-from audio.multi_source import get_multi_source, MultiSource
+from audio.multi_source import get_multi_source
 from audio.tts import get_tts_audio_source
-from discord import FFmpegPCMAudio, PCMAudio
-import re
-from typing import Dict, List
+from discord import FFmpegPCMAudio
+from typing import Dict
 import torch
 
 assistants: Dict[int, AssistantListener] = {}
-
-EXTRA_RE = re.compile(r'\([^)]*\)')
-SENTENCE_RE = re.compile(r'([^.!?]+[.!?]?)')
-
-
-class AssistantContext(Context):
-
-    def __init__(self, content: str, ctx: Context, multi_source: MultiSource, pcm: torch.Tensor = None):
-        super().__init__(ctx.client, ctx.message)
-        self.content = content
-        self.multi_source = multi_source
-        self.pcm = pcm
-
-    async def reply(self, text):
-        await super().reply(f'> {self.content}\n{text}')
-        tts_text = EXTRA_RE.sub('', text)
-        if self.message.guild.voice_client:
-            sentences = []
-            for sentence in SENTENCE_RE.findall(tts_text):
-                sentence = sentence.strip()
-                if not sentence:
-                    continue
-                if not sentence.endswith('.'):
-                    sentence += '.'
-                sentences.append(sentence)
-
-            print(sentences)
-            audio_queue: List[PCMAudio] = []
-            playing = False
-
-            async def on_end():
-                nonlocal audio_queue, playing
-                if not audio_queue:
-                    playing = False
-                    return
-                playing = True
-                audio = audio_queue.pop(0)
-                self.multi_source.add(f'assistant_{self.message.author.id}',
-                                      audio, on_end=on_end)
-
-            for sentence in sentences:
-                new_audio = await execute(get_tts_audio_source, sentence, self.lang)
-                audio_queue.append(new_audio)
-                if not playing:
-                    await on_end()
 
 
 async def start_assistant(ctx: Context):

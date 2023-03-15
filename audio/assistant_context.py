@@ -45,7 +45,7 @@ class AssistantContext(Context):
             for segment in segments:
                 sfx_source = get_sfx_source(segment)
                 if sfx_source:
-                    source_queue.append((sfx_source, 0.5))
+                    source_queue.append((sfx_source, 0.3))
                 else:
                     if not segment.endswith('.'):
                         segment += '.'

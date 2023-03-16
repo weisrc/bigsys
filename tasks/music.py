@@ -43,7 +43,8 @@ async def play_music(ctx: Context, search: str):
         entry = track.next()
         if entry is None:
             return
-        multi_source.add("music", discord.FFmpegPCMAudio(entry.url), 0.1, play)
+        volume = multi_source.get_volume("music", 0.1)
+        multi_source.add("music", discord.FFmpegPCMAudio(entry.url), volume, play)
         await track.current.ctx.reply(f'Now playing {track.current.title} ({track.current.webpage_url})')
     await play()
 

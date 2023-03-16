@@ -46,15 +46,17 @@ async def NULL_ON_END():
 class MultiSource(AudioSource):
 
     def __init__(self, voice_client: VoiceClient):
+        self.volumes: Dict[str, float] = {}
         self.entries: Dict[str, SourceEntry] = {}
         self.voice_client = voice_client
 
-    def add(self, name: str, source: AudioSource, volume: float = 1, on_end: Callable = NULL_ON_END):
+    def add(self, name: str, source: AudioSource, volume: float = 1.0, on_end: Callable = NULL_ON_END):
         if source.is_opus():
             raise Exception("MultiSource does not support opus sources")
         if self.has(name):
             self.remove(name, False)
         l.debug(f"adding source {name}")
+        self.volumes[name] = volume
         self.entries[name] = SourceEntry(source, volume, on_end)
         self.update_play_state()
 
@@ -91,9 +93,13 @@ class MultiSource(AudioSource):
             self.entries[name].paused = paused
         self.update_play_state()
 
+    def get_volume(self, name: str, default=1.0) -> float:
+        return self.volumes.get(name, default)
+
     def set_volume(self, name: str, volume: float):
         if name in self.entries:
             self.entries[name].volume = volume
+            self.volumes[name] = volume
 
     def read(self) -> bytes:
         out = torch.zeros(FRAME_SIZE // 2)

@@ -2,7 +2,7 @@ from tasks.basic import greet, exit_vc, wiki, usage, time, date, uptime
 from tasks.music import play_music, next_music, pause_music, resume_music, list_music, music_volume
 from tasks.assistant import start_assistant, stop_assistant
 from tasks.info import info_creator, info_name, info_functions
-from tasks.voice import copy_voice, use_voice
+from tasks.voice import copy_voice, use_voice, export_voice
 from tasks.story import generate_story
 from tasks.joke import joke
 from handlers.intent_handler import engine, intent_handler
@@ -50,6 +50,7 @@ def intent_bootstrap():
 
     engine.add('copy voice', 'copy my voice')(copy_voice)
     engine.add('use voice number', index='which voice number?')(use_voice)
+    engine.add('export voice', 'export the current voice')(export_voice)
 
     engine.add('tell me a fantasy story about something', genre='what type of story?', prompt='what is the story about?')(generate_story)
 

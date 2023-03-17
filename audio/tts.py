@@ -84,4 +84,8 @@ def normalize_tts_text(text: str) -> str:
     return text.replace('MB', ' megabytes').replace('%', ' percent')
 
 
+def get_hex_embed():
+    data: bytes = embed.numpy().tobytes()
+    return data.hex()
+
 set_voice_from_dataset(7306)

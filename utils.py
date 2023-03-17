@@ -1,8 +1,10 @@
 import logging
 import asyncio
+from os import PathLike
 import time
 import warnings
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Union
+from io import BufferedIOBase
 
 import psutil
 import discord
@@ -44,6 +46,7 @@ def execute(f, *args, **kwargs):
 class Context:
 
     lang = 'en'
+    file: discord.File = None
 
     def __init__(self, client: discord.Client, message: discord.Message):
         clean = message.content.replace(
@@ -52,10 +55,17 @@ class Context:
         self.client: discord.Client = client
         self.message: discord.Message = message
 
+    def attach_file(self, fp: Union[BufferedIOBase, PathLike], filename: str):
+        self.file = discord.File(fp, filename=filename)
+
     async def reply(self, text: str):
+        await self.reply_text(text)
+
+    async def reply_text(self, text: str):
         denorm_text = denormalize(text, self.mentions)
         if self.client.get_message(self.message.id):
-            await self.message.reply(denorm_text)
+            await self.message.reply(denorm_text,
+                                     file=self.file)
         else:
             await self.message.channel.send(f"Replying to <@{self.message.author.id}>:\n{denorm_text}")
 

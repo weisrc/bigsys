@@ -2,7 +2,6 @@ import io
 from discord import PCMAudio
 from transformers import SpeechT5Processor, SpeechT5ForTextToSpeech, SpeechT5HifiGan
 import torch
-from speechbrain.pretrained import EncoderClassifier
 import torch.nn.functional as F
 from datasets import load_dataset
 from functools import lru_cache
@@ -13,6 +12,7 @@ from utils import profile_resource_usage, get_logger
 
 import re
 from num2words import num2words
+from speechbrain.inference.speaker import EncoderClassifier
 
 
 l = get_logger(__name__)
